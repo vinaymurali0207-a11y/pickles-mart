@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pickles Mart - Login</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-container { width: 100%; max-width: 400px; background: white; padding: 24px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        h1 { text-align: center; margin-bottom: 24px; }
+        .field { margin-bottom: 16px; }
+        .field label { display: block; margin-bottom: 6px; font-size: 14px; color: #333; }
+        .field input { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; font-family: Arial, sans-serif; }
+        .field input:focus { border-color: #5b9dfa; outline: none; box-shadow: 0 0 0 2px rgba(91,157,250,0.2); }
+        .login-methods { display: flex; gap: 8px; margin-bottom: 16px; }
+        .method-btn { flex: 1; padding: 10px; border: 1px solid #ccc; background: white; color: #333; border-radius: 6px; cursor: pointer; font-size: 15px; }
+        .method-btn.active { background: green; color: white; border-color: green; }
+        .submit-btn { width: 100%; padding: 10px; background: green; border: none; color: white; font-size: 16px; border-radius: 6px; cursor: pointer; }
+        .submit-btn:hover { background: darkgreen; }
+        .message { text-align: center; margin-top: 14px; color: #d8000c; display: none; }
+        .switch-text { text-align: center; margin-top: 14px; font-size: 14px; }
+        .switch-text button { border: none; background: transparent; color: #0b6bcb; cursor: pointer; font-size: 14px; padding: 0; }
+        .switch-text button:hover { text-decoration: underline; }
+        .back-link { text-align: center; margin-top: 16px; }
+        .back-link a { color: #333; text-decoration: none; }
+        .back-link a:hover { color: #5b9dfa; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1 id="formTitle">Login</h1>
+        <form id="loginForm">
+            <div id="nameFields" style="display:none;">
+    <div class="field">
+        <label>First Name</label>
+        <input type="text" id="firstName" placeholder="Enter first name">
+    </div>
+    <div class="field">
+        <label>Last Name</label>
+        <input type="text" id="lastName" placeholder="Enter last name">
+    </div>
+</div>
+            <div class="login-methods">
+                <button type="button" class="method-btn active" data-method="email">Email</button>
+                <button type="button" class="method-btn" data-method="phone">Phone</button>
+            </div>
+            <div class="field">
+                <label for="userId" id="userIdLabel">Email</label>
+                <input type="email" id="userId" name="userId" placeholder="Enter email" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Max 16 chars: Aa, 1, @" maxlength="16" required>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">Sign In</button>
+            <div class="message" id="loginMessage">Please enter your email/mobile and password.</div>
+        </form>
+        <div class="switch-text">
+            <span id="switchLabel">New user?</span>
+            <button type="button" id="modeToggle">Create account</button>
+        </div>
+        <div class="back-link"><a href="pickle.html">Back to Home</a></div>
+    </div>
+
+    <script>
+const formTitle = document.getElementById('formTitle');
+const submitBtn = document.getElementById('submitBtn');
+const switchLabel = document.getElementById('switchLabel');
+const modeToggle = document.getElementById('modeToggle');
+const methodButtons = document.querySelectorAll('.method-btn');
+const userIdInput = document.getElementById('userId');
+const userIdLabel = document.getElementById('userIdLabel');
+const passwordInput = document.getElementById('password');
+let isRegisterMode = false;
+let loginMethod = 'email';
+
+function showMessage(message) {
+    const msg = document.getElementById('loginMessage');
+    msg.textContent = message;
+    msg.style.color = 'red';
+    msg.style.display = 'block';
+}
+
+function setLoginMethod(method) {
+    loginMethod = method;
+    methodButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.method === method);
+    });
+
+    if (method === 'phone') {
+        userIdLabel.textContent = 'Phone No.';
+        userIdInput.type = 'tel';
+        userIdInput.placeholder = 'Enter phone number';
+        userIdInput.maxLength = 10;
+        userIdInput.pattern = '[0-9]{10}';
+    } else {
+        userIdLabel.textContent = 'Email';
+        userIdInput.type = 'email';
+        userIdInput.placeholder = 'Enter email';
+        userIdInput.removeAttribute('maxlength');
+        userIdInput.removeAttribute('pattern');
+    }
+
+    userIdInput.value = '';
+    document.getElementById('loginMessage').style.display = 'none';
+}
+
+function setMode(registerMode) {
+    isRegisterMode = registerMode;
+    formTitle.textContent = registerMode ? 'Create Account' : 'Login';
+    submitBtn.textContent = registerMode ? 'Create Account' : 'Sign In';
+    const nameFields = document.getElementById('nameFields');
+
+if (registerMode) {
+    nameFields.style.display = 'block';
+} else {
+    nameFields.style.display = 'none';
+}
+    switchLabel.textContent = registerMode ? 'Already have an account?' : 'New user?';
+    modeToggle.textContent = registerMode ? 'Login' : 'Create account';
+
+    document.getElementById('loginMessage').style.display = 'none';
+}
+
+modeToggle.addEventListener('click', function() {
+    setMode(!isRegisterMode);
+});
+
+methodButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        setLoginMethod(button.dataset.method);
+    });
+});
+
+userIdInput.addEventListener('input', function() {
+    if (loginMethod === 'phone') {
+        userIdInput.value = userIdInput.value.replace(/\D/g, '').slice(0, 10);
+    }
+});
+
+function isStrongPassword(password) {
+    return password.length >= 8
+        && password.length <= 16
+        && /[A-Z]/.test(password)
+        && /[a-z]/.test(password)
+        && /[0-9]/.test(password)
+        && /[^A-Za-z0-9]/.test(password);
+}
+
+function validateForm(userId, password) {
+    if (loginMethod === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userId)) {
+        showMessage('Please enter a valid email address.');
+        return false;
+    }
+
+    if (loginMethod === 'phone' && !/^\d{10}$/.test(userId)) {
+        showMessage('Phone number must contain exactly 10 digits.');
+        return false;
+    }
+
+    if (!isStrongPassword(password)) {
+        showMessage('Password must be 8-16 characters with uppercase, lowercase, number, and special character.');
+        return false;
+    }
+
+    return true;
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const userId = document.getElementById('userId').value.trim();
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('loginMessage');
+    const endpoint = isRegisterMode ? 'register' : 'login';
+    let body = { userId, password };
+
+if (isRegisterMode) {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+
+    if (!firstName || !lastName) {
+        showMessage("Enter first and last name");
+        return;
+    }
+
+    body.firstName = firstName;
+    body.lastName = lastName;
+}
+
+    if (!validateForm(userId, password)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:5000/api/auth/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+            msg.textContent = isRegisterMode ? 'Account created successfully' : 'Login successful';
+            msg.style.color = 'green';
+            msg.style.display = 'block';
+
+          localStorage.setItem('userId', data.userId);
+
+// 🔥 IMPORTANT FIX
+localStorage.setItem('username', data.firstName);
+
+if (data.address) {
+    localStorage.setItem('address', data.address);
+}
+            setTimeout(() => {
+                window.location.href = 'pickle.html';
+            }, 1000);
+
+        } else {
+            msg.textContent = data.message || data.error || 'Login failed. Please try again.';
+            msg.style.color = 'red';
+            msg.style.display = 'block';
+        }
+
+    } catch (err) {
+        msg.textContent = 'Server error';
+        msg.style.color = 'red';
+        msg.style.display = 'block';
+    }
+});
+    </script>
+</body>
+</html>

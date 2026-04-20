@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pickles Mart</title>
+
+<style>
+
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #fff6e6;
+    scroll-behavior: smooth;
+}
+
+/* Navigation */
+nav {
+    background: #222;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 20px;
+    font-size: 18px;
+}
+
+.nav-links a:hover { color: yellow; }
+
+.nav-left {
+    position: relative;
+}
+
+.hamburger-btn {
+    width: 38px;
+    height: 38px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin: 0;
+    border-radius: 6px;
+}
+
+.hamburger-btn img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-menu {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    color: #222;
+    box-shadow: 8px 0 24px rgba(0,0,0,0.22);
+    padding: 16px;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    z-index: 2000;
+}
+
+.profile-menu.show {
+    transform: translateX(0);
+}
+
+.drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1500;
+}
+
+.drawer-overlay.show {
+    display: block;
+}
+
+.menu-links {
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+}
+
+.menu-links a {
+    display: block;
+    color: #222;
+    text-decoration: none;
+    padding: 12px 6px;
+    border-radius: 6px;
+}
+
+.menu-links a:hover {
+    background: #f2f2f2;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.profile-avatar {
+    display: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: green;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.profile-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.profile-label {
+    font-size: 12px;
+    color: #777;
+}
+
+.profile-detail {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.profile-form {
+    display: none;
+    margin-top: 14px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.profile-form label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #444;
+}
+
+.profile-form input,
+.profile-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: Arial;
+}
+
+.profile-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.profile-message {
+    display: none;
+    margin-top: 8px;
+    font-size: 13px;
+    color: red;
+}
+
+.profile-menu a,
+.profile-menu button {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    margin-top: 12px;
+    padding: 9px;
+    border-radius: 6px;
+    border: none;
+    background: green;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.profile-menu button {
+    cursor: pointer;
+}
+
+.profile-menu a:hover,
+.profile-menu button:hover {
+    background: darkgreen;
+}
+
+.profile-menu .menu-links a {
+    background: transparent;
+    color: #222;
+    text-align: left;
+    margin-top: 0;
+    padding: 12px 6px;
+}
+
+.profile-menu .menu-links a:hover {
+    background: #f2f2f2;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.signin-icon {
+    text-decoration: none;
+    margin-right: 20px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+    color: white;
+}
+
+.signin-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgb(250, 250, 249);
+}
+
+.signin-icon:hover svg {
+    stroke: rgb(250, 250, 249);
+}
+
+.signin-icon svg {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.search-icon {
+    text-decoration: none;
+    margin-right: 20px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.search-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.search-icon:hover svg {
+    stroke: rgb(250, 250, 249);
+}
+
+.cart {
+    text-decoration: none;
+    margin-left: 5px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.cart:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.cart:hover svg {
+    stroke: rgb(246, 246, 241);
+}
+
+/* Sections */
+section {
+    padding: 40px 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+}
+
+.hero img {
+    width: 90%;
+    height: 500px;
+    object-fit: cover;
+    max-width: 1200px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px gray;
+}
+
+.marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 1000px;
+    position: relative;
+    z-index: 0;
+}
+
+.marquee h1 {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 12s linear infinite;
+    position: relative;
+    z-index: 0;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Choice buttons */
+.choice {
+    text-align: center;
+    margin: 25px;
+}
+
+.choice a {
+    display: inline-block;
+    margin: 15px;
+    padding: 15px 30px;
+    background: darkred;
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.choice a:hover {
+    background: green;
+    transform: scale(1.1);
+}
+
+/* Product grid */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 12px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 0 8px #ccc;
+    transition: 0.3s;
+}
+
+.card:hover { transform: scale(1.05); }
+
+.card img {
+    width: 100%;
+    height: 130px;
+    border-radius: 8px;
+}
+
+button {
+    background: green;
+    color: white;
+    border: none;
+    padding: 8px;
+    margin-top: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover { background: darkgreen; }
+
+/* Contact */
+.contact {
+    text-align: center;
+    font-size: 18px;
+}
+
+.search-box {
+    display: none;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.search-box input {
+    padding: 5px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.search-box button {
+    padding: 5px 10px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.search-box button:hover {
+    background: darkgreen;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+    <div class="nav-left">
+        <button class="hamburger-btn" id="profileToggle" type="button" title="Profile">
+            <img src="17583748.svg" alt="Menu">
+        </button>
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        <div class="profile-menu" id="profileMenu">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <div>
+                    <div class="profile-name" id="profileName">Guest</div>
+                    <div class="profile-label" id="profileLoginId">Please login</div>
+                </div>
+            </div>
+            <div class="profile-detail">
+                <strong>Address:</strong>
+                <div id="profileAddress">Not added</div>
+            </div>
+            <div class="profile-form" id="profileForm">
+                <label for="profileUsernameInput">Username</label>
+                <input type="text" id="profileUsernameInput" placeholder="Enter username">
+                <label for="profileAddressInput">Address</label>
+                <textarea id="profileAddressInput" placeholder="Enter delivery address"></textarea>
+                <button type="button" id="profileSaveBtn">Save Profile</button>
+                <div class="profile-message" id="profileMessage"></div>
+            </div>
+            <div class="menu-links">
+                <a href="pickle.html">Home</a>
+                <a href="#" id="profileLink">Profile</a>
+                <a href="veg.html">Veg</a>
+                <a href="nonveg.html">Non-Veg</a>
+                <a href="cart.html">Cart</a>
+                <a href="pickle.html#contact">Others</a>
+            </div>
+            <a href="login.html" id="profileLoginLink">Login / Create Account</a>
+            <button type="button" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+    <div class="nav-links">
+        <a href="pickle.html">Home</a>
+        <a href="veg.html">Veg</a>
+        <a href="nonveg.html">Non-Veg</a>
+        <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-right">        <a href="login.html" class="signin-icon" title="Sign In">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/>
+                <line x1="10" y1="12" x2="18" y2="12"/>
+                <polyline points="15 9 18 12 15 15"/>
+            </svg>
+             <span id="loginText">Login</span>
+        </a>        <a href="#" class="search-icon" title="Search">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </a>
+        <a href="cart.html" class="cart" id="cartLink" title="View Cart">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+        </a>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+</nav>
+
+<div class="search-box">
+    <input type="text" placeholder="Search products...">
+    <button>Search</button>
+</div>
+
+<!-- HOME -->
+<section id="home">
+
+<div class="hero">
+<img src="logo.png">
+</div>
+
+<div class="marquee">
+<h1 style="text-align:center;">Welcome to Pickles Mart 🥒</h1>
+</div>
+
+<div class="choice">
+<a href="veg.html">Veg Pickles</a>
+<a href="nonveg.html">Non-Veg Pickles</a>
+</div>
+
+<h2><b> Our Collections</b></h2>
+
+<div class="products">
+
+<!-- 20+ mixed -->
+<div class="card"><img src="mango2.webp" alt="Mango Pickle"><h3>Mango</h3><p>₹199</p><button>Buy</button></div>
+<div class="card"><img src="lemon.webp" alt="Lemon Pickle"><h3>Lemon</h3><p>₹149</p><button>Buy</button></div>
+<div class="card"><img src="Garlic.jpeg" alt="Garlic Pickle"><h3>Garlic</h3><p>₹179</p><button>Buy</button></div>
+<div class="card"><img src="tomato.webp" alt="Tomato Pickle"><h3>Tomato</h3><p>₹129</p><button>Buy</button></div>
+<div class="card"><img src="chilli.webp"><h3>Chilli</h3><p>₹139</p><button>Buy</button></div>
+<div class="card"><img src="ginger.webp"><h3>Ginger</h3><p>₹159</p><button>Buy</button></div>
+<div class="card"><img src="mixed veg.webp"><h3>Mixed Veg</h3><p>₹199</p><button>Buy</button></div>
+<div class="card"><img src="chicken.png"><h3>Chicken</h3><p>₹299</p><button>Buy</button></div>
+<div class="card"><img src="mutton.png"><h3>Mutton</h3><p>₹399</p><button>Buy</button></div>
+<div class="card"><img src="prawn.png"><h3>Prawn</h3><p>₹349</p><button>Buy</button></div>
+<div class="card"><img src="fish.png"><h3>Fish</h3><p>₹279</p><button>Buy</button></div>
+<div class="card"><img src="crab.png"><h3>Crab</h3><p>₹429</p><button>Buy</button></div>
+
+</div>
+
+</section>
+
+<!-- VEG -->
+<section id="veg">
+
+<h2>Veg Pickles</h2>
+
+<div class="products">
+<div class="card"><img src="mango2.webp" alt="Mango Pickle"><h3>Mango</h3><p>₹199</p><button>Buy</button></div>
+<div class="card"><img src="lemon.webp" alt="Lemon Pickle"><h3>Lemon</h3><p>₹149</p><button>Buy</button></div>
+<div class="card"><img src="Garlic.jpeg" alt="Garlic Pickle"><h3>Garlic</h3><p>₹179</p><button>Buy</button></div>
+<div class="card"><img src="tomato.webp" alt="Tomato Pickle"><h3>Tomato</h3><p>₹129</p><button>Buy</button></div>
+<div class="card"><img src="chilli.webp"><h3>Chilli</h3><p>₹139</p><button>Buy</button></div>
+</div>
+
+</section>
+
+<!-- NON VEG -->
+<section id="nonveg">
+
+<h2>Non-Veg Pickles</h2>
+
+<div class="products">
+<div class="card"><img src="chicken.png" alt="Chicken Pickle"><h3>Chicken</h3><p>₹299</p><button>Buy</button></div>
+<div class="card"><img src="mutton.png" alt="Mutton Pickle"><h3>Mutton</h3><p>₹399</p><button>Buy</button></div>
+<div class="card"><img src="prawn.png" alt="Prawn Pickle"><h3>Prawn</h3><p>₹349</p><button>Buy</button></div>
+<div class="card"><img src="fish.png" alt="Fish Pickle"><h3>Fish</h3><p>₹279</p><button>Buy</button></div>
+<div class="card"><img src="crab.png" alt="Crab Pickle"><h3>Crab</h3><p>₹429</p><button>Buy</button></div>
+</div>
+
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+
+<h2>Contact Us</h2>
+
+<div class="contact">
+<p>PicklesMart@gmail.com</p>
+<p>Phone: +91 9948607206,+91 9703397229</p>
+<p>Location: Kakinada, Andhra Pradesh</p>
+</div>
+
+</section>
+
+<script>
+    console.log("SCRIPT LOADED");
+const routeMap = {
+    mango: 'pickle.html', lemon: 'pickle.html', garlic: 'pickle.html', tomato: 'pickle.html', chilli: 'pickle.html', ginger: 'pickle.html', 'mixed veg': 'pickle.html', chicken: 'nonveg.html', mutton: 'nonveg.html', prawn: 'nonveg.html', fish: 'nonveg.html', crab: 'nonveg.html', nethallu: 'nonveg.html', korameenu: 'nonveg.html', tuna: 'nonveg.html', kavallu: 'nonveg.html', kanagadathalu: 'nonveg.html', vanjaram: 'nonveg.html', teepiavakaya: 'veg.html', sorakaya: 'veg.html', pandumirchi: 'veg.html', oosirikaya: 'veg.html', dabbakaya: 'veg.html', cauliflower: 'veg.html'
+};
+
+function clearHighlight(cards) {
+    cards.forEach(c => {
+        c.style.outline = 'none';
+        c.style.background = '';
+    });
+}
+
+function searchProduct(query) {
+    const normalized = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('.card');
+
+    if (!normalized) {
+        clearHighlight(cards);
+        cards.forEach(card => card.style.display = 'block');
+        return true;
+    }
+
+    let foundCard = null;
+    cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        if (!foundCard && title.includes(normalized)) {
+            foundCard = card;
+        }
+    });
+
+    if (foundCard) {
+        cards.forEach(card => card.style.display = 'block');
+        clearHighlight(cards);
+        foundCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        foundCard.style.outline = '3px solid #ff9800';
+        foundCard.style.background = '#fff8e1';
+        return true;
+    }
+
+    return false;
+}
+
+function getPageForQuery(query) {
+    const normalized = query.toLowerCase().trim();
+    if (!normalized) return null;
+
+    for (const key in routeMap) {
+        if (key.includes(normalized) || normalized.includes(key)) {
+            return routeMap[key];
+        }
+    }
+
+    return null;
+}
+
+function runSearch() {
+    const input = document.querySelector('.search-box input');
+    const query = input.value.toLowerCase().trim();
+
+    if (searchProduct(query)) {
+        return;
+    }
+
+    const currentPage = window.location.pathname.split('/').pop();
+    const redirectPage = getPageForQuery(query);
+
+    if (redirectPage && redirectPage !== currentPage) {
+        window.location.href = `${redirectPage}?search=${encodeURIComponent(query)}`;
+    } else {
+        alert('No pickle found with that name on this site.');
+        clearHighlight(document.querySelectorAll('.card'));
+    }
+}
+
+function initSearchFromQueryParam() {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('search');
+    if (query) {
+        document.querySelector('.search-box input').value = query;
+        if (!searchProduct(query)) {
+            alert('No pickle found with that name on this page.');
+        }
+    }
+}
+
+document.querySelector('.search-icon').addEventListener('click', function(e) {
+    e.preventDefault();
+    var box = document.querySelector('.search-box');
+    box.style.display = box.style.display === 'none' || box.style.display === '' ? 'block' : 'none';
+});
+
+document.querySelector('.search-box button').addEventListener('click', function() {
+    runSearch();
+});
+
+document.querySelector('.search-box input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        runSearch();
+    }
+});
+
+function updateCartCount() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    fetch(`http://localhost:5000/api/cart/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+        const count = (data.items || []).reduce((t, i) => t + i.qty, 0);
+        document.getElementById('cartCount').textContent = count;
+    });
+}
+
+function updateLoginDisplay() {
+    const userId = localStorage.getItem('userId');
+    const loginLink = document.querySelector('.signin-icon');
+
+    if (loginLink) {
+        loginLink.style.display = userId ? 'none' : 'inline-block';
+    }
+}
+
+function updateProfileMenu() {
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const address = localStorage.getItem('address');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileLoginId = document.getElementById('profileLoginId');
+    const profileAddress = document.getElementById('profileAddress');
+    const profileLoginLink = document.getElementById('profileLoginLink');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (userId) {
+        const displayName = username && username !== 'undefined' ? username : 'User';
+        profileName.textContent = displayName;
+        profileAvatar.textContent = displayName.charAt(0);
+        profileAvatar.style.display = 'flex';
+        profileLoginId.textContent = userId;
+        profileAddress.textContent = address && address !== 'undefined' ? address : 'Not added';
+        profileLoginLink.style.display = 'none';
+        logoutBtn.style.display = 'block';
+    } else {
+        profileAvatar.textContent = '';
+        profileAvatar.style.display = 'none';
+        profileName.textContent = 'Guest';
+        profileLoginId.textContent = 'Please login';
+        profileAddress.textContent = 'Not added';
+        profileLoginLink.style.display = 'block';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+function initProfileMenu() {
+    const profileToggle = document.getElementById('profileToggle');
+    const profileMenu = document.getElementById('profileMenu');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profileLink = document.getElementById('profileLink');
+    const profileForm = document.getElementById('profileForm');
+    const profileUsernameInput = document.getElementById('profileUsernameInput');
+    const profileAddressInput = document.getElementById('profileAddressInput');
+    const profileSaveBtn = document.getElementById('profileSaveBtn');
+    const profileMessage = document.getElementById('profileMessage');
+
+    function closeMenu() {
+        profileMenu.classList.remove('show');
+        drawerOverlay.classList.remove('show');
+    }
+
+    function showProfileForm() {
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+        const address = localStorage.getItem('address');
+
+        if (!userId) {
+            profileMessage.textContent = 'Please login first to fill profile details.';
+            profileMessage.style.display = 'block';
+            return;
+        }
+
+        profileUsernameInput.value = username && username !== 'undefined' ? username : '';
+        profileAddressInput.value = address && address !== 'undefined' ? address : '';
+        profileMessage.style.display = (!profileUsernameInput.value || !profileAddressInput.value) ? 'block' : 'none';
+        profileMessage.textContent = 'Please fill missing profile details.';
+        profileForm.style.display = 'block';
+        profileForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function saveProfile() {
+        const userId = localStorage.getItem('userId');
+        const username = profileUsernameInput.value.trim();
+        const address = profileAddressInput.value.trim();
+
+        if (!username || !address) {
+            profileMessage.textContent = 'Username and address are required.';
+            profileMessage.style.color = 'red';
+            profileMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, address })
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                profileMessage.textContent = data.message || data.error || 'Profile update failed.';
+                profileMessage.style.color = 'red';
+                profileMessage.style.display = 'block';
+                return;
+            }
+
+            localStorage.setItem('username', data.username);
+            localStorage.setItem('address', data.address);
+            updateProfileMenu();
+            profileMessage.textContent = 'Profile saved.';
+            profileMessage.style.color = 'green';
+            profileMessage.style.display = 'block';
+        } catch (err) {
+            profileMessage.textContent = 'Server error';
+            profileMessage.style.color = 'red';
+            profileMessage.style.display = 'block';
+        }
+    }
+
+    profileToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        profileMenu.classList.toggle('show');
+        drawerOverlay.classList.toggle('show');
+    });
+
+    profileMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    drawerOverlay.addEventListener('click', closeMenu);
+
+    profileLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        showProfileForm();
+    });
+
+    profileSaveBtn.addEventListener('click', saveProfile);
+
+    logoutBtn.addEventListener('click', function() {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        localStorage.removeItem('address');
+        updateLoginDisplay();
+        updateProfileMenu();
+        profileForm.style.display = 'none';
+        closeMenu();
+    });
+}
+
+function addToCart(name, price) {
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+        alert("Login first");
+        return;
+    }
+
+    fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, name, price: Number(price) })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert(name + " added to cart");
+    })
+    .catch(err => console.error(err));
+}
+
+// BUTTON CONNECT (already correct)
+document.querySelectorAll('.card button').forEach(button => {
+    button.addEventListener('click', function () {
+        const card = button.closest('.card');
+        const name = card.querySelector('h3').textContent;
+        const price = card.querySelector('p').textContent.replace(/[₹,\s]/g, '');
+        addToCart(name, price);
+    });
+});
+
+
+// ✅ FIXED PART (THIS WAS YOUR BUG)
+document.addEventListener('DOMContentLoaded', function() {
+    initSearchFromQueryParam();
+    updateLoginDisplay();
+    updateProfileMenu();
+    initProfileMenu();
+    updateCartCount();
+});
+</script>
+
+
+</body>
+</html>

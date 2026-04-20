@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pickles Mart - Cart</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #fff6e6; padding: 20px; }
+        .profile-area { position: fixed; top: 15px; left: 15px; z-index: 2000; }
+        .hamburger-btn { width: 38px; height: 38px; background: white; border: none; display: flex; align-items: center; justify-content: center; padding: 4px; margin: 0; border-radius: 6px; cursor: pointer; }
+        .hamburger-btn img { width: 28px; height: 28px; object-fit: contain; }
+        .hamburger-btn:hover { background: #f0f0f0; }
+        .profile-menu { display: block; position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: white; color: #222; box-shadow: 8px 0 24px rgba(0,0,0,0.22); padding: 16px; transform: translateX(-110%); transition: transform 0.3s ease; overflow-y: auto; z-index: 2000; }
+        .profile-menu.show { transform: translateX(0); }
+        .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1500; }
+        .drawer-overlay.show { display: block; }
+        .menu-links { margin-top: 16px; border-top: 1px solid #eee; padding-top: 8px; }
+        .menu-links a { display: block; color: #222; text-decoration: none; padding: 12px 6px; border-radius: 6px; }
+        .menu-links a:hover { background: #f2f2f2; }
+        .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .profile-avatar { display: none; width: 42px; height: 42px; border-radius: 50%; background: green; color: white; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; text-transform: uppercase; }
+        .profile-name { font-weight: bold; margin-bottom: 4px; }
+        .profile-label { font-size: 12px; color: #777; }
+        .profile-detail { margin-top: 10px; font-size: 14px; line-height: 1.4; }
+        .profile-form { display: none; margin-top: 14px; border-top: 1px solid #eee; padding-top: 12px; }
+        .profile-form label { display: block; margin-top: 10px; margin-bottom: 5px; font-size: 13px; color: #444; }
+        .profile-form input, .profile-form textarea { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
+        .profile-form textarea { min-height: 70px; resize: vertical; }
+        .profile-message { display: none; margin-top: 8px; font-size: 13px; color: red; }
+        .profile-menu a, .profile-menu button { width: 100%; display: block; box-sizing: border-box; text-align: center; margin-top: 12px; padding: 9px; border-radius: 6px; border: none; background: green; color: white; text-decoration: none; font-size: 14px; cursor: pointer; }
+        .profile-menu a:hover, .profile-menu button:hover { background: darkgreen; }
+        .profile-menu .menu-links a { background: transparent; color: #222; text-align: left; margin-top: 0; padding: 12px 6px; }
+        .profile-menu .menu-links a:hover { background: #f2f2f2; }
+        .container { max-width: 900px; margin: auto; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background: #f7f7f7; }
+        .actions { margin-top: 15px; text-align: right; display: none; gap: 10px; }
+        .btn { padding: 10px 14px; border: 0; background: green; color: white; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: darkgreen; }
+        .message { text-align: center; font-size: 16px; margin-top: 20px; }
+        a { color: green; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="profile-area">
+        <button class="hamburger-btn" id="profileToggle" type="button" title="Profile">
+            <img src="17583748.svg" alt="Menu">
+        </button>
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        <div class="profile-menu" id="profileMenu">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <div>
+                    <div class="profile-name" id="profileName">Guest</div>
+                    <div class="profile-label" id="profileLoginId">Please login</div>
+                </div>
+            </div>
+            <div class="profile-detail">
+                <strong>Address:</strong>
+                <div id="profileAddress">Not added</div>
+            </div>
+            <div class="profile-form" id="profileForm">
+                <label for="profileUsernameInput">Username</label>
+                <input type="text" id="profileUsernameInput" placeholder="Enter username">
+                <label for="profileAddressInput">Address</label>
+                <textarea id="profileAddressInput" placeholder="Enter delivery address"></textarea>
+                <button type="button" id="profileSaveBtn">Save Profile</button>
+                <div class="profile-message" id="profileMessage"></div>
+            </div>
+            <div class="menu-links">
+                <a href="pickle.html">Home</a>
+                <a href="#" id="profileLink">Profile</a>
+                <a href="veg.html">Veg</a>
+                <a href="nonveg.html">Non-Veg</a>
+                <a href="cart.html">Cart</a>
+                <a href="pickle.html#contact">Others</a>
+            </div>
+            <a href="login.html" id="profileLoginLink">Login / Create Account</a>
+            <button type="button" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Your Cart</h1>
+
+        <div class="message" id="emptyMessage">Loading...</div>
+
+        <table id="cartTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+        </table>
+
+        <div class="actions" id="cartActions">
+            <strong id="grandTotal">Total: ₹0</strong>
+            <button class="btn" id="clearCart">Clear Cart</button>
+            <button class="btn" id="checkoutBtn">Checkout</button>
+        </div>
+
+        <p style="text-align:center; margin-top: 20px;">
+            <a href="pickle.html">Continue shopping</a>
+        </p>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('userId');
+
+        const body = document.getElementById('cartBody');
+        const cartTable = document.getElementById('cartTable');
+        const cartActions = document.getElementById('cartActions');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const grandTotalEl = document.getElementById('grandTotal');
+
+        function updateProfileMenu() {
+            userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username');
+            const address = localStorage.getItem('address');
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileName = document.getElementById('profileName');
+            const profileLoginId = document.getElementById('profileLoginId');
+            const profileAddress = document.getElementById('profileAddress');
+            const profileLoginLink = document.getElementById('profileLoginLink');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (userId) {
+                const displayName = username && username !== 'undefined' ? username : 'User';
+                profileName.textContent = displayName;
+                profileAvatar.textContent = displayName.charAt(0);
+                profileAvatar.style.display = 'flex';
+                profileLoginId.textContent = userId;
+                profileAddress.textContent = address && address !== 'undefined' ? address : 'Not added';
+                profileLoginLink.style.display = 'none';
+                logoutBtn.style.display = 'block';
+            } else {
+                profileAvatar.textContent = '';
+                profileAvatar.style.display = 'none';
+                profileName.textContent = 'Guest';
+                profileLoginId.textContent = 'Please login';
+                profileAddress.textContent = 'Not added';
+                profileLoginLink.style.display = 'block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        function initProfileMenu() {
+            const profileToggle = document.getElementById('profileToggle');
+            const profileMenu = document.getElementById('profileMenu');
+            const drawerOverlay = document.getElementById('drawerOverlay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const profileLink = document.getElementById('profileLink');
+            const profileForm = document.getElementById('profileForm');
+            const profileUsernameInput = document.getElementById('profileUsernameInput');
+            const profileAddressInput = document.getElementById('profileAddressInput');
+            const profileSaveBtn = document.getElementById('profileSaveBtn');
+            const profileMessage = document.getElementById('profileMessage');
+
+            function closeMenu() {
+                profileMenu.classList.remove('show');
+                drawerOverlay.classList.remove('show');
+            }
+
+            function showProfileForm() {
+                const username = localStorage.getItem('username');
+                const address = localStorage.getItem('address');
+
+                if (!userId) {
+                    profileMessage.textContent = 'Please login first to fill profile details.';
+                    profileMessage.style.display = 'block';
+                    return;
+                }
+
+                profileUsernameInput.value = username && username !== 'undefined' ? username : '';
+                profileAddressInput.value = address && address !== 'undefined' ? address : '';
+                profileMessage.style.display = (!profileUsernameInput.value || !profileAddressInput.value) ? 'block' : 'none';
+                profileMessage.textContent = 'Please fill missing profile details.';
+                profileForm.style.display = 'block';
+                profileForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            async function saveProfile() {
+                const username = profileUsernameInput.value.trim();
+                const address = profileAddressInput.value.trim();
+
+                if (!username || !address) {
+                    profileMessage.textContent = 'Username and address are required.';
+                    profileMessage.style.color = 'red';
+                    profileMessage.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, address })
+                    });
+                    const data = await res.json().catch(() => ({}));
+
+                    if (!res.ok) {
+                        profileMessage.textContent = data.message || data.error || 'Profile update failed.';
+                        profileMessage.style.color = 'red';
+                        profileMessage.style.display = 'block';
+                        return;
+                    }
+
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('address', data.address);
+                    updateProfileMenu();
+                    profileMessage.textContent = 'Profile saved.';
+                    profileMessage.style.color = 'green';
+                    profileMessage.style.display = 'block';
+                } catch (err) {
+                    profileMessage.textContent = 'Server error';
+                    profileMessage.style.color = 'red';
+                    profileMessage.style.display = 'block';
+                }
+            }
+
+            profileToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileMenu.classList.toggle('show');
+                drawerOverlay.classList.toggle('show');
+            });
+
+            profileMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            drawerOverlay.addEventListener('click', closeMenu);
+
+            profileLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showProfileForm();
+            });
+
+            profileSaveBtn.addEventListener('click', saveProfile);
+
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                localStorage.removeItem('address');
+                userId = null;
+                updateProfileMenu();
+                profileForm.style.display = 'none';
+                closeMenu();
+            });
+        }
+
+        // 🔥 Load cart from backend
+        function loadCart() {
+            if (!userId) {
+                emptyMessage.textContent = "Please login first";
+                emptyMessage.style.display = "block";
+                return;
+            }
+
+            fetch(`http://localhost:5000/api/cart/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                renderCart(data.items || []);
+            })
+            .catch(err => {
+                console.error(err);
+                emptyMessage.textContent = "Error loading cart";
+            });
+        }
+
+        // 🔥 Render cart UI
+        function renderCart(cart) {
+            if (!cart.length) {
+                cartTable.style.display = 'none';
+                cartActions.style.display = 'none';
+                emptyMessage.textContent = 'No items in cart yet.';
+                emptyMessage.style.display = 'block';
+                return;
+            }
+
+            emptyMessage.style.display = 'none';
+            cartTable.style.display = 'table';
+            cartActions.style.display = 'flex';
+            body.innerHTML = '';
+
+            let grandTotal = 0;
+
+            cart.forEach(item => {
+                const row = document.createElement('tr');
+                const total = item.price * item.qty;
+                grandTotal += total;
+
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>₹${item.price.toFixed(2)}</td>
+                    <td>${item.qty}</td>
+                    <td>₹${total.toFixed(2)}</td>
+                    <td><button class="btn" onclick="removeItem('${item.name}')">Remove</button></td>
+                `;
+
+                body.appendChild(row);
+            });
+
+            grandTotalEl.textContent = 'Total: ₹' + grandTotal.toFixed(2);
+        }
+
+        // 🔥 Remove item
+        function removeItem(name) {
+            fetch('http://localhost:5000/api/cart/remove', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId, name })
+            })
+            .then(res => res.json())
+            .then(() => loadCart());
+        }
+
+        // 🔥 Clear cart
+        document.getElementById('clearCart').addEventListener('click', function () {
+            if (!confirm('Clear entire cart?')) return;
+
+            fetch('http://localhost:5000/api/cart/clear', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId })
+            })
+            .then(res => res.json())
+            .then(() => loadCart());
+        });
+
+        // Checkout (dummy)
+        document.getElementById('checkoutBtn').addEventListener('click', function () {
+            alert('Checkout coming soon!');
+        });
+
+        // 🔥 Load on page open
+        updateProfileMenu();
+        initProfileMenu();
+        loadCart();
+    </script>
+</body>
+</html>
