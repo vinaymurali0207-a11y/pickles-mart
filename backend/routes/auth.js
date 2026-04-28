@@ -39,12 +39,13 @@ router.post('/register', async (req, res) => {
         const hashed = await bcrypt.hash(password, 10);
 
         const user = new User({
-    userId,
-    firstName,
-    lastName,
-    address,
-    password: hashed
-});
+            userId,
+            firstName,
+            lastName,
+            username: firstName,
+            address,
+            password: hashed
+        });
         
 
         await user.save();
@@ -54,6 +55,7 @@ router.post('/register', async (req, res) => {
             userId: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
+            username: user.firstName,
             address: user.address || ''
         });
     } catch (err) {
@@ -85,7 +87,9 @@ router.post('/login', async (req, res) => {
         res.json({
             message: 'Login successful',
             userId: user._id,
-            username: user.username || user.userId,
+            firstName: user.firstName || user.username || '',
+            lastName: user.lastName || '',
+            username: user.firstName || user.username || user.userId,
             address: user.address || ''
         });
 
@@ -105,7 +109,7 @@ router.put('/profile/:id', async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { username, address },
+            { username, firstName: username, address },
             { new: true }
         );
 
@@ -116,6 +120,7 @@ router.put('/profile/:id', async (req, res) => {
         res.json({
             message: 'Profile updated',
             userId: user._id,
+            firstName: user.firstName,
             username: user.username,
             address: user.address
         });
