@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
     lastName: String,
     username: String,
     address: String,
-    password: String
+    password: String,
+    verifiedReviewer: {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);

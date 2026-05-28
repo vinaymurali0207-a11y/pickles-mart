@@ -23,17 +23,23 @@ router.post('/register', async (req, res) => {
 
     try {
         if (!isValidUserId(userId)) {
-            return res.status(400).json({ message: 'Enter a valid email or 10 digit phone number' });
+            return res.status(400).json({
+                message: 'Enter a valid email or 10 digit phone number'
+            });
         }
 
         if (!isStrongPassword(password)) {
-            return res.status(400).json({ message: 'Password must be 8-16 characters with uppercase, lowercase, number, and special character' });
+            return res.status(400).json({
+                message: 'Password must be 8-16 characters with uppercase, lowercase, number, and special character'
+            });
         }
 
         const existingUser = await User.findOne({ userId });
 
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({
+                message: 'User already exists'
+            });
         }
 
         const hashed = await bcrypt.hash(password, 10);
@@ -46,7 +52,6 @@ router.post('/register', async (req, res) => {
             address,
             password: hashed
         });
-        
 
         await user.save();
 
@@ -59,7 +64,9 @@ router.post('/register', async (req, res) => {
             address: user.address || ''
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: err.message
+        });
     }
 });
 
@@ -69,19 +76,25 @@ router.post('/login', async (req, res) => {
 
     try {
         if (!isValidUserId(userId)) {
-            return res.status(400).json({ message: 'Enter a valid email or 10 digit phone number' });
+            return res.status(400).json({
+                message: 'Enter a valid email or 10 digit phone number'
+            });
         }
 
         const user = await User.findOne({ userId });
 
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(400).json({
+                message: 'User not found'
+            });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Wrong password' });
+            return res.status(400).json({
+                message: 'Wrong password'
+            });
         }
 
         res.json({
@@ -94,7 +107,9 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: err.message
+        });
     }
 });
 
@@ -104,17 +119,27 @@ router.put('/profile/:id', async (req, res) => {
 
     try {
         if (!username || !address) {
-            return res.status(400).json({ message: 'Username and address are required' });
+            return res.status(400).json({
+                message: 'Username and address are required'
+            });
         }
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { username, firstName: username, address },
-            { new: true }
+            {
+                username,
+                firstName: username,
+                address
+            },
+            {
+                new: true
+            }
         );
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({
+                message: 'User not found'
+            });
         }
 
         res.json({
@@ -124,8 +149,47 @@ router.put('/profile/:id', async (req, res) => {
             username: user.username,
             address: user.address
         });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: err.message
+        });
+    }
+});
+
+// CONTROL VERIFIED REVIEW BADGE
+router.put('/verified-reviewer/:id', async (req, res) => {
+    try {
+        const query = req.params.id.match(/^[0-9a-fA-F]{24}$/)
+            ? { _id: req.params.id }
+            : { userId: req.params.id };
+
+        const user = await User.findOneAndUpdate(
+            query,
+            {
+                verifiedReviewer: req.body.verifiedReviewer === true
+            },
+            {
+                new: true
+            }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            userId: user._id,
+            username: user.username || user.userId,
+            verifiedReviewer: user.verifiedReviewer === true
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            error: err.message
+        });
     }
 });
 
