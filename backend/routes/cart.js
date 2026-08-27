@@ -1,20 +1,46 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const User = require('../models/User');
 
 function escapeRegex(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function normalizeProductName(name) {
+    return String(name || '').replace(/\s+pickle$/i, '').trim();
+}
+
+function findUserQuery(userId) {
+    return mongoose.Types.ObjectId.isValid(userId)
+        ? { $or: [{ _id: userId }, { userId }] }
+        : { userId };
+}
+
+async function getUserIds(userId) {
+    const ids = [String(userId)];
+    if (!userId) return ids;
+    try {
+        const user = await User.findOne(findUserQuery(userId));
+        if (user) {
+            ids.push(String(user._id));
+            if (user.userId) ids.push(user.userId);
+        }
+    } catch (e) {}
+    return Array.from(new Set(ids));
+}
+
 async function findProduct(reqBody) {
-    if (reqBody.productId) {
+    if (reqBody.productId && mongoose.Types.ObjectId.isValid(reqBody.productId)) {
         const product = await Product.findById(reqBody.productId);
         if (product) return product;
     }
 
     if (reqBody.name) {
-        return Product.findOne({ name: new RegExp(`^${escapeRegex(reqBody.name)}$`, 'i') });
+        const name = normalizeProductName(reqBody.name);
+        return Product.findOne({ name: new RegExp(`^${escapeRegex(name)}$`, 'i') });
     }
 
     return null;
@@ -31,7 +57,7 @@ function priceForWeight(product, weight) {
     return Number(product.basePrice) * (multipliers[weight] || 1);
 }
 
-// ADD ITEM
+// ADD ITEM TO CART
 router.post('/add', async (req, res) => {
     try {
         const { userId, name } = req.body;
@@ -44,10 +70,11 @@ router.post('/add', async (req, res) => {
             return res.status(400).json({ message: 'Valid user, product, and price are required' });
         }
 
-        let cart = await Cart.findOne({ userId });
+        const userIds = await getUserIds(userId);
+        let cart = await Cart.findOne({ userId: { $in: userIds } });
 
         if (!cart) {
-            cart = new Cart({ userId, items: [] });
+            cart = new Cart({ userId: String(userId), items: [] });
         }
 
         const item = cart.items.find(i => String(i.product || '') === String(product._id) && (i.weight || '100g') === weight);
@@ -70,22 +97,25 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// GET CART
+// GET USER CART
 router.get('/:userId', async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.params.userId }).populate('items.product');
+        const userIds = await getUserIds(req.params.userId);
+        const cart = await Cart.findOne({ userId: { $in: userIds } }).populate('items.product');
         res.json(cart || { items: [] });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-// REMOVE ITEM
+
+// REMOVE ITEM FROM CART
 router.post('/remove', async (req, res) => {
     const { userId, name } = req.body;
     const weight = req.body.weight ? String(req.body.weight) : null;
     const product = await findProduct(req.body);
 
-    let cart = await Cart.findOne({ userId });
+    const userIds = await getUserIds(userId);
+    let cart = await Cart.findOne({ userId: { $in: userIds } });
     if (!cart) return res.json({ items: [] });
 
     cart.items = cart.items.filter(item => {
@@ -100,11 +130,12 @@ router.post('/remove', async (req, res) => {
     res.json(cart);
 });
 
-// CLEAR CART
+// CLEAR ENTIRE CART
 router.post('/clear', async (req, res) => {
     const { userId } = req.body;
 
-    let cart = await Cart.findOne({ userId });
+    const userIds = await getUserIds(userId);
+    let cart = await Cart.findOne({ userId: { $in: userIds } });
     if (!cart) return res.json({ items: [] });
 
     cart.items = [];

@@ -13,7 +13,11 @@ function clampRating(value) {
 }
 
 function pickFirst(...values) {
-    return values.find(value => value !== undefined && value !== null && String(value).trim() !== '');
+    return values.find(value => {
+        if (value === undefined || value === null) return false;
+        const normalized = String(value).trim();
+        return normalized !== '' && normalized.toLowerCase() !== 'undefined' && normalized.toLowerCase() !== 'null';
+    });
 }
 
 function getReviewUserId(review) {
@@ -46,6 +50,15 @@ function priceForWeight(product, weight) {
     return Number(product.basePrice) * (multipliers[weight] || 1);
 }
 
+function productNameAliases(productName) {
+    const rawName = String(productName || '').trim();
+    return [...new Set([
+        rawName,
+        rawName.replace(/\s+pickle$/i, '').trim(),
+        rawName.replace(/\s+paste$/i, '').trim()
+    ].filter(Boolean))];
+}
+
 async function findProduct(productName, productId) {
     if (productId && mongoose.Types.ObjectId.isValid(productId)) {
         const product = await Product.findById(productId);
@@ -53,7 +66,20 @@ async function findProduct(productName, productId) {
     }
 
     if (!productName) return null;
-    return Product.findOne({ name: new RegExp(`^${escapeRegex(productName)}$`, 'i') });
+
+    const aliases = productNameAliases(productName);
+
+    const exactProduct = await Product.findOne({
+        $or: aliases.map(name => ({ name: new RegExp(`^${escapeRegex(name)}$`, 'i') }))
+    });
+    if (exactProduct) return exactProduct;
+
+    return Product.findOne({
+        $or: aliases.flatMap(name => ([
+            { name: new RegExp(`^${escapeRegex(name)}\\b`, 'i') },
+            { name: new RegExp(`\\b${escapeRegex(name)}\\b`, 'i') }
+        ]))
+    });
 }
 
 function normalizeReview(review, verifiedUsers) {
@@ -91,11 +117,9 @@ function normalizeReview(review, verifiedUsers) {
     const reviewUserId = getReviewUserId(review);
     const userRecord = reviewUserId ? verifiedUsers.get(reviewUserId) : null;
     const userExists = Boolean(userRecord);
-    const verified = userExists && (
-        typeof review.verified === 'boolean'
-            ? review.verified
-            : userRecord.verifiedReviewer === true
-    );
+    const verified = typeof review.verified === 'boolean'
+        ? review.verified
+        : (userRecord?.verifiedReviewer === true);
     // Use firstName from user record if available, otherwise use customerName
     const displayName = userRecord?.firstName || customerName;
 
@@ -142,8 +166,7 @@ router.post('/add', async (req, res) => {
         const product = await findProduct(productName, req.body.productId);
 
         if (!user) {
-            console.warn('⚠️ Review submission failed: User not found -', userId);
-            return res.status(404).json({ message: 'User not found' });
+            console.warn('Review submission: User not found, saving as unverified reviewer -', userId);
         }
         if (!product) {
             console.warn('⚠️ Review submission failed: Product not found -', productName);
@@ -151,11 +174,11 @@ router.post('/add', async (req, res) => {
         }
 
         // Use firstName if available, otherwise use provided username
-        const displayName = user.firstName || String(username);
+        const displayName = user?.firstName || user?.username || String(username);
 
         const review = await Review.create({
-            user: user._id,
-            userId: String(user._id),
+            user: user?._id,
+            userId: user ? String(user._id) : String(userId),
             product: product._id,
             username: displayName,
             productName: product.name,
@@ -164,7 +187,7 @@ router.post('/add', async (req, res) => {
             price: priceForWeight(product, weight),
             image: image || product.image,
             weight,
-            verified: user.verifiedReviewer === true
+            verified: false
         });
 
         console.log('✅ Review created successfully:', { id: review._id, productName: product.name, reviewerName: displayName });
@@ -179,9 +202,13 @@ router.get('/product/:productName', async (req, res) => {
     try {
         const productName = req.params.productName;
         const product = await findProduct(productName);
+        const aliases = [...new Set([
+            ...productNameAliases(productName),
+            ...productNameAliases(product?.name)
+        ])];
         const query = product
-            ? { $or: [{ product: product._id }, { productName: new RegExp(`^${escapeRegex(product.name)}$`, 'i') }] }
-            : { productName: new RegExp(`^${escapeRegex(productName)}$`, 'i') };
+            ? { $or: [{ product: product._id }, ...aliases.map(name => ({ productName: new RegExp(`^${escapeRegex(name)}$`, 'i') }))] }
+            : { $or: aliases.map(name => ({ productName: new RegExp(`^${escapeRegex(name)}$`, 'i') })) };
         const reviews = await Review.find(query).sort({ createdAt: -1, _id: -1 }).lean();
 
         const reviewUserIds = [...new Set(reviews.map(getReviewUserId).filter(Boolean))];
@@ -211,7 +238,7 @@ router.get('/product/:productName', async (req, res) => {
             rating: clampRating(review.rating || review.stars),
             reviewText: pickFirst(review.reviewText, review.review, review.comment, review.text, ''),
             createdAt: review.createdAt || review._id?.getTimestamp?.() || new Date(),
-            verified: verifiedUsers.get(getReviewUserId(review))?.verifiedReviewer === true || review.verified === true
+            verified: review.verified === true
         })));
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -241,7 +268,15 @@ router.get('/', async (req, res) => {
             if (user.userId) verifiedUsers.set(String(user.userId), userInfo);
         });
 
-        res.json(reviews.map(review => normalizeReview(review, verifiedUsers)).filter(review => review.reviewText));
+        let normalizedReviews = reviews
+            .map(review => normalizeReview(review, verifiedUsers))
+            .filter(review => review.reviewText);
+
+        if (req.query.verified === 'true') {
+            normalizedReviews = normalizedReviews.filter(review => review.verified === true);
+        }
+
+        res.json(normalizedReviews);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
