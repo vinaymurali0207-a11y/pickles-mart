@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pickles Mart - Cart</title>
+    <title>Pickles Mart - Cart & Order History</title>
+    <link rel="stylesheet" href="checkout.css">
     <style>
         body { margin: 0; font-family: Arial, sans-serif; background: #fff6e6; padding: 20px; }
         .profile-area { position: fixed; top: 15px; left: 15px; z-index: 2000; }
@@ -20,7 +21,7 @@
         .profile-avatar { display: none; width: 42px; height: 42px; border-radius: 50%; background: green; color: white; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; text-transform: uppercase; }
         .profile-name { font-weight: bold; margin-bottom: 4px; }
         .profile-label { font-size: 12px; color: #777; }
-        .profile-detail { margin-top: 10px; font-size: 14px; line-height: 1.4; }
+        .profile-detail { margin-top: 10px; font-size: 14px; line-height: 1.4; background: #f9f9f9; padding: 10px; border-radius: 6px; }
         .profile-form { display: none; margin-top: 14px; border-top: 1px solid #eee; padding-top: 12px; }
         .profile-form label { display: block; margin-top: 10px; margin-bottom: 5px; font-size: 13px; color: #444; }
         .profile-form input, .profile-form textarea { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
@@ -30,16 +31,26 @@
         .profile-menu a:hover, .profile-menu button:hover { background: darkgreen; }
         .profile-menu .menu-links a { background: transparent; color: #222; text-align: left; margin-top: 0; padding: 12px 6px; }
         .profile-menu .menu-links a:hover { background: #f2f2f2; }
-        .container { max-width: 900px; margin: auto; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; }
+        .container { max-width: 900px; margin: 20px auto; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         th { background: #f7f7f7; }
-        .actions { margin-top: 15px; text-align: right; display: none; gap: 10px; }
+        .actions { margin-top: 15px; text-align: right; display: none; gap: 10px; justify-content: flex-end; align-items: center; }
         .btn { padding: 10px 14px; border: 0; background: green; color: white; border-radius: 5px; cursor: pointer; }
         .btn:hover { background: darkgreen; }
+        .btn-danger { background: #d8000c; }
+        .btn-danger:hover { background: #a00000; }
         .message { text-align: center; font-size: 16px; margin-top: 20px; }
         a { color: green; text-decoration: none; }
+        
+        /* Order History Styles */
+        .order-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; margin-bottom: 14px; background: #fafafa; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; font-size: 14px; }
+        .order-status { padding: 3px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .order-item-line { display: flex; justify-content: space-between; font-size: 13px; margin: 4px 0; color: #555; }
+        .order-footer { display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; border-top: 1px dashed #ddd; padding-top: 8px; }
+        .badge-count { background: green; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -57,8 +68,11 @@
                 </div>
             </div>
             <div class="profile-detail">
-                <strong>Address:</strong>
+                <strong>Address (MongoDB):</strong>
                 <div id="profileAddress">Not added</div>
+                <div style="margin-top:8px;">
+                    <strong>Total Orders in DB:</strong> <span class="badge-count" id="profileTotalOrders">0</span>
+                </div>
             </div>
             <div class="profile-form" id="profileForm">
                 <label for="profileUsernameInput">Username</label>
@@ -70,7 +84,7 @@
             </div>
             <div class="menu-links">
                 <a href="pickle.html">Home</a>
-                <a href="#" id="profileLink">Profile</a>
+                <a href="profile.html" id="profileLink">Profile Account</a>
                 <a href="veg.html">Veg</a>
                 <a href="nonveg.html">Non-Veg</a>
                 <a href="cart.html">Cart</a>
@@ -80,15 +94,17 @@
             <button type="button" id="logoutBtn">Logout</button>
         </div>
     </div>
+
     <div class="container">
         <h1>Your Cart</h1>
 
-        <div class="message" id="emptyMessage">Loading...</div>
+        <div class="message" id="emptyMessage">Loading cart...</div>
 
         <table id="cartTable" style="display:none;">
             <thead>
                 <tr>
                     <th>Product</th>
+                    <th>Weight</th>
                     <th>Price</th>
                     <th>Qty</th>
                     <th>Total</th>
@@ -99,14 +115,21 @@
         </table>
 
         <div class="actions" id="cartActions">
-            <strong id="grandTotal">Total: ₹0</strong>
-            <button class="btn" id="clearCart">Clear Cart</button>
-            <button class="btn" id="checkoutBtn">Checkout</button>
+            <strong id="grandTotal" style="font-size:18px; margin-right: auto;">Total: ₹0</strong>
+            <button class="btn btn-danger" id="clearCart">Clear Cart</button>
+            <button class="btn" id="checkoutBtn">Checkout & Order</button>
         </div>
 
         <p style="text-align:center; margin-top: 20px;">
-            <a href="pickle.html">Continue shopping</a>
+            <a href="pickle.html">← Continue Shopping</a>
         </p>
+    </div>
+
+    <!-- ORDER HISTORY SECTION CONNECTED TO MONGODB -->
+    <div class="container" id="orderHistoryContainer" style="margin-top: 30px;">
+        <h2>Order History (Stored in MongoDB Database)</h2>
+        <div id="orderHistoryMessage" class="message">Login to view order history.</div>
+        <div id="orderHistoryList" style="display:none;"></div>
     </div>
 
     <script>
@@ -118,7 +141,7 @@
         const emptyMessage = document.getElementById('emptyMessage');
         const grandTotalEl = document.getElementById('grandTotal');
 
-        function updateProfileMenu() {
+        async function updateProfileMenu() {
             userId = localStorage.getItem('userId');
             const username = localStorage.getItem('username');
             const address = localStorage.getItem('address');
@@ -126,11 +149,12 @@
             const profileName = document.getElementById('profileName');
             const profileLoginId = document.getElementById('profileLoginId');
             const profileAddress = document.getElementById('profileAddress');
+            const profileTotalOrders = document.getElementById('profileTotalOrders');
             const profileLoginLink = document.getElementById('profileLoginLink');
             const logoutBtn = document.getElementById('logoutBtn');
 
             if (userId) {
-                const displayName = username && username !== 'undefined' ? username : 'User';
+                const displayName = username && username !== 'undefined' ? username : 'Customer';
                 profileName.textContent = displayName;
                 profileAvatar.textContent = displayName.charAt(0);
                 profileAvatar.style.display = 'flex';
@@ -138,12 +162,33 @@
                 profileAddress.textContent = address && address !== 'undefined' ? address : 'Not added';
                 profileLoginLink.style.display = 'none';
                 logoutBtn.style.display = 'block';
+
+                // Fetch fresh profile details & total orders from MongoDB backend
+                try {
+                    const res = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+                    if (res.ok) {
+                        const userData = await res.json();
+                        if (userData.address) {
+                            localStorage.setItem('address', userData.address);
+                            profileAddress.textContent = userData.address;
+                        }
+                        if (userData.username) {
+                            localStorage.setItem('username', userData.username);
+                            profileName.textContent = userData.username;
+                            profileAvatar.textContent = userData.username.charAt(0);
+                        }
+                        profileTotalOrders.textContent = userData.totalOrders || 0;
+                    }
+                } catch (err) {
+                    console.log('Error fetching DB user metrics:', err);
+                }
             } else {
                 profileAvatar.textContent = '';
                 profileAvatar.style.display = 'none';
                 profileName.textContent = 'Guest';
                 profileLoginId.textContent = 'Please login';
                 profileAddress.textContent = 'Not added';
+                profileTotalOrders.textContent = '0';
                 profileLoginLink.style.display = 'block';
                 logoutBtn.style.display = 'none';
             }
@@ -213,11 +258,11 @@
                     localStorage.setItem('username', data.username);
                     localStorage.setItem('address', data.address);
                     updateProfileMenu();
-                    profileMessage.textContent = 'Profile saved.';
+                    profileMessage.textContent = 'Profile saved in MongoDB.';
                     profileMessage.style.color = 'green';
                     profileMessage.style.display = 'block';
                 } catch (err) {
-                    profileMessage.textContent = 'Server error';
+                    profileMessage.textContent = 'Server error connecting to MongoDB';
                     profileMessage.style.color = 'red';
                     profileMessage.style.display = 'block';
                 }
@@ -250,34 +295,51 @@
                 updateProfileMenu();
                 profileForm.style.display = 'none';
                 closeMenu();
+                loadCart();
+                loadOrderHistory();
             });
         }
 
-        // 🔥 Load cart from backend
+        async function safeFetch(path, options) {
+            const requestOptions = { ...(options || {}), cache: (options && options.cache) || 'no-store' };
+            try {
+                return await fetch(`http://localhost:5000${path}`, requestOptions);
+            } catch (err) {
+                return await fetch(`http://127.0.0.1:5000${path}`, requestOptions);
+            }
+        }
+
+        // 🔥 Load cart from MongoDB backend
         function loadCart() {
             if (!userId) {
-                emptyMessage.textContent = "Please login first";
+                emptyMessage.innerHTML = 'Please <a href="login.html">login</a> first to view your cart.';
                 emptyMessage.style.display = "block";
+                cartTable.style.display = 'none';
+                cartActions.style.display = 'none';
                 return;
             }
 
-            fetch(`http://localhost:5000/api/cart/${userId}`)
-            .then(res => res.json())
+            safeFetch(`/api/cart/${encodeURIComponent(userId)}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Unable to load cart');
+                return res.json();
+            })
             .then(data => {
-                renderCart(data.items || []);
+                renderCart(Array.isArray(data.items) ? data.items : []);
             })
             .catch(err => {
                 console.error(err);
-                emptyMessage.textContent = "Error loading cart";
+                emptyMessage.textContent = "Error connecting to backend database";
             });
         }
 
         // 🔥 Render cart UI
         function renderCart(cart) {
+            window.PickleMartCartItems = Array.isArray(cart) ? cart : [];
             if (!cart.length) {
                 cartTable.style.display = 'none';
                 cartActions.style.display = 'none';
-                emptyMessage.textContent = 'No items in cart yet.';
+                emptyMessage.textContent = 'No items in your database cart yet.';
                 emptyMessage.style.display = 'block';
                 return;
             }
@@ -291,15 +353,19 @@
 
             cart.forEach(item => {
                 const row = document.createElement('tr');
-                const total = item.price * item.qty;
+                const price = Number(item.price) || 0;
+                const qty = Number(item.qty) || 1;
+                const weight = item.weight || '100g';
+                const total = price * qty;
                 grandTotal += total;
 
                 row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>₹${item.price.toFixed(2)}</td>
-                    <td>${item.qty}</td>
+                    <td><strong>${item.name}</strong></td>
+                    <td>${weight}</td>
+                    <td>₹${price.toFixed(2)}</td>
+                    <td>${qty}</td>
                     <td>₹${total.toFixed(2)}</td>
-                    <td><button class="btn" onclick="removeItem('${item.name}')">Remove</button></td>
+                    <td><button class="btn btn-danger" onclick="removeItem('${item.name}', '${weight}')">Remove</button></td>
                 `;
 
                 body.appendChild(row);
@@ -308,22 +374,22 @@
             grandTotalEl.textContent = 'Total: ₹' + grandTotal.toFixed(2);
         }
 
-        // 🔥 Remove item
-        function removeItem(name) {
-            fetch('http://localhost:5000/api/cart/remove', {
+        // 🔥 Remove item from MongoDB Cart
+        function removeItem(name, weight) {
+            safeFetch('/api/cart/remove', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId, name })
+                body: JSON.stringify({ userId, name, weight })
             })
             .then(res => res.json())
             .then(() => loadCart());
         }
 
-        // 🔥 Clear cart
+        // 🔥 Clear cart in MongoDB
         document.getElementById('clearCart').addEventListener('click', function () {
             if (!confirm('Clear entire cart?')) return;
 
-            fetch('http://localhost:5000/api/cart/clear', {
+            safeFetch('/api/cart/clear', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ userId })
@@ -332,15 +398,96 @@
             .then(() => loadCart());
         });
 
-        // Checkout (dummy)
-        document.getElementById('checkoutBtn').addEventListener('click', function () {
-            alert('Checkout coming soon!');
+        // 🔥 LOAD ORDER HISTORY FROM MONGODB
+        async function loadOrderHistory() {
+            const orderHistoryMessage = document.getElementById('orderHistoryMessage');
+            const orderHistoryList = document.getElementById('orderHistoryList');
+
+            if (!userId) {
+                orderHistoryMessage.innerHTML = 'Please <a href="login.html">login</a> to view order history stored in database.';
+                orderHistoryMessage.style.display = 'block';
+                orderHistoryList.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await safeFetch(`/api/orders/user/${userId}`);
+                const data = await res.json();
+
+                const orders = data.orders || (Array.isArray(data) ? data : []);
+
+                if (!orders || orders.length === 0) {
+                    orderHistoryMessage.textContent = 'No past orders found in MongoDB database.';
+                    orderHistoryMessage.style.display = 'block';
+                    orderHistoryList.style.display = 'none';
+                    return;
+                }
+
+                orderHistoryMessage.style.display = 'none';
+                orderHistoryList.style.display = 'block';
+                orderHistoryList.innerHTML = '';
+
+                orders.forEach(order => {
+                    const card = document.createElement('div');
+                    card.className = 'order-card';
+                    const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Recent';
+                    const addrDisplay = typeof order.deliveryAddress === 'object' && order.deliveryAddress
+                        ? `${order.deliveryAddress.name || ''} - ${order.deliveryAddress.houseNo || ''} ${order.deliveryAddress.area || ''}, ${order.deliveryAddress.city || ''} (${order.deliveryAddress.mobile || ''})`
+                        : (order.deliveryAddress || 'Not specified');
+
+                    const itemsHtml = (order.items || []).map(item => `
+                        <div class="order-item-line">
+                            <span>📦 ${item.name} (${item.weight || '100g'}) × ${item.qty}</span>
+                            <span>₹${(item.total || 0).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+
+                    const statusStepperHtml = window.PickleMartCheckout
+                        ? window.PickleMartCheckout.renderStatusStepperHTML(order.status)
+                        : `<span class="order-status">${order.status || 'Order Placed'}</span>`;
+
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <div>
+                                <strong>Order ID:</strong> ${order._id}<br>
+                                <small style="color:#777;">Placed on: ${orderDate} | Payment: ${order.paymentMethod ? order.paymentMethod.toUpperCase() : 'COD'}</small>
+                            </div>
+                            <span class="order-status" style="background:#ed1c24; color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">${order.status || 'Order Placed'}</span>
+                        </div>
+                        ${statusStepperHtml}
+                        ${itemsHtml}
+                        <div class="order-footer">
+                            <span>Delivery Address: ${addrDisplay}</span>
+                            <span style="color:green; font-weight:bold;">Total: ₹${(order.totalAmount || order.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                    `;
+                    orderHistoryList.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('Error fetching MongoDB order history:', err);
+                orderHistoryMessage.textContent = 'Failed to load order history from database.';
+            }
+        }
+
+        // 🔥 Checkout (creates Order in MongoDB)
+        document.getElementById('checkoutBtn').addEventListener('click', async function () {
+            if (!userId) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            if (window.PickleMartCheckout) {
+                window.PickleMartCheckout.startCartCheckout(window.PickleMartCartItems);
+            }
         });
 
-        // 🔥 Load on page open
+        // 🔥 Initialize Page
         updateProfileMenu();
         initProfileMenu();
         loadCart();
+        loadOrderHistory();
     </script>
+    <script src="checkout.js"></script>
 </body>
 </html>

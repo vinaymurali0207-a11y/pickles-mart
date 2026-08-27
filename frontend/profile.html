@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile & Account - Pickles Mart</title>
+    <link rel="stylesheet" href="checkout.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8f1ea;
+            color: #241f20;
+        }
+
+        /* Navigation - Home Page Style */
+        nav {
+            background: #222;
+            padding: 15px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo { height: 40px; width: auto; object-fit: contain; }
+        .nav-links { display: flex; justify-content: center; flex: 1; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .nav-links a:hover { color: yellow; }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .icon-link {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+        }
+        .icon-link:hover { background: rgba(255,255,255,0.25); color: yellow; }
+
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 20px auto 0;
+            padding: 0 24px;
+            font-size: 14px;
+            color: #666;
+        }
+        .breadcrumb a { color: #ed1c24; text-decoration: none; font-weight: bold; }
+        .breadcrumb span { margin: 0 8px; color: #aaa; }
+
+        .container {
+            max-width: 1200px;
+            margin: 24px auto 60px;
+            padding: 0 24px;
+        }
+
+        /* Hero Amazon-Style Account Header */
+        .account-hero-card {
+            background: white;
+            padding: 32px;
+            border: 1px solid #e0d6cf;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        /* Profile Avatar - First Letter Photo */
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #ed1c24;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 6px 18px rgba(237, 28, 36, 0.3);
+            border: 3px solid white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .account-info { flex: 1; }
+        .account-info h1 {
+            font-size: 32px;
+            margin: 0 0 6px;
+            color: #241f20;
+        }
+        .account-email { font-size: 16px; color: #666; margin-bottom: 10px; }
+        .badge-verified {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* Dashboard Grid Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 28px;
+        }
+
+        .card-box {
+            background: white;
+            padding: 28px;
+            border: 1px solid #e0d6cf;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        }
+
+        .card-box h2 {
+            margin-top: 0;
+            font-size: 22px;
+            color: #241f20;
+            border-bottom: 2px solid #ed1c24;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Amazon-Style Structured Address Blocks */
+        .address-block-display {
+            background: #fff9df;
+            padding: 20px;
+            border: 2px dashed #dfd2c7;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        .address-block-display strong { color: #241f20; }
+
+        .address-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group-full { grid-column: 1 / -1; }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #444;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: Arial;
+        }
+
+        .btn-red {
+            background: #ed1c24;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 800;
+            border-radius: 999px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 14px;
+        }
+        .btn-red:hover { background: #b9141b; }
+
+        .btn-dark {
+            background: #241f20;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-dark:hover { background: #444; }
+
+        .stat-badge {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ed1c24;
+            margin-bottom: 6px;
+        }
+
+        .user-review-item {
+            background: #faf7f2;
+            border-left: 4px solid #ed1c24;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .user-review-item strong { color: #ed1c24; }
+
+        .msg-box { display: none; margin-top: 10px; padding: 10px; font-weight: bold; }
+        .msg-success { color: green; }
+        .msg-error { color: red; }
+    </style>
+</head>
+<body>
+
+    <!-- NAV BAR - HOME PAGE STYLE -->
+    <nav>
+        <div class="nav-left">
+            <a href="pickle.html"><img class="logo" src="logo.png" alt="Pickles Mart"></a>
+        </div>
+
+        <div class="nav-links">
+            <a href="pickle.html">Home</a>
+            <a href="veg.html">Veg</a>
+            <a href="nonveg.html">Non-Veg</a>
+            <a href="cart.html">Cart</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="profile.html" class="icon-link" title="Profile">Profile Account</a>
+            <a href="cart.html" class="icon-link" title="Cart">Cart</a>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="pickle.html">Home</a><span>-</span><strong>Your Account & Profile</strong>
+    </div>
+
+    <main class="container">
+        <!-- AMAZON STYLE ACCOUNT HERO BANNER -->
+        <div class="account-hero-card" id="accountHero">
+            <div class="profile-avatar-large" id="heroAvatar">U</div>
+            <div class="account-info">
+                <h1 id="heroName">Customer Profile</h1>
+                <div class="account-email" id="heroEmail">Loading account details from database...</div>
+                <div>
+                    <span class="badge-verified" id="heroStatus">Verified Pickles Mart Customer</span>
+                </div>
+            </div>
+            <div>
+                <button class="btn-dark" type="button" id="logoutBtnTop">Logout Account</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- 1. AMAZON STYLE STRUCTURED ADDRESS BLOCKS -->
+            <div class="card-box">
+                <h2><span>Saved Delivery Address (MongoDB)</span></h2>
+
+                <div class="address-block-display" id="addressBlockDisplay">
+                    <strong>Formatted Delivery Address:</strong><br>
+                    <span id="displayFullAddress">Loading address details...</span>
+                </div>
+
+                <form id="addressForm">
+                    <h3>Edit Amazon-Style Address Blocks</h3>
+                    <div class="address-form-grid">
+                        <div class="form-group form-group-full">
+                            <label for="inputHouseNo">Flat, House No., Building / Apartment Name</label>
+                            <input type="text" id="inputHouseNo" placeholder="e.g. Flat 4B, Greenfield Towers">
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label for="inputArea">Area, Street, Sector, Village</label>
+                            <input type="text" id="inputArea" placeholder="e.g. MG Road, Near Benz Circle">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputCity">Town / City</label>
+                            <input type="text" id="inputCity" placeholder="e.g. Vijayawada">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputState">State</label>
+                            <input type="text" id="inputState" placeholder="e.g. Andhra Pradesh">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPincode">Pincode (6 Digits)</label>
+                            <input type="text" id="inputPincode" placeholder="e.g. 520010" maxlength="6">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputLandmark">Landmark (Optional)</label>
+                            <input type="text" id="inputLandmark" placeholder="e.g. Opposite SBI Bank">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-red">Save Address Blocks to Database</button>
+                    <div class="msg-box msg-success" id="addressSuccessMsg">Address updated successfully!</div>
+                    <div class="msg-box msg-error" id="addressErrorMsg"></div>
+                </form>
+            </div>
+
+            <!-- 2. EDIT PROFILE & AVATAR -->
+            <div class="card-box">
+                <h2><span>Profile Details</span></h2>
+
+                <form id="profileDetailsForm">
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label for="inputFirstName">First Name</label>
+                        <input type="text" id="inputFirstName" placeholder="First Name">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label for="inputLastName">Last Name</label>
+                        <input type="text" id="inputLastName" placeholder="Last Name">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label for="inputUsername">Username (Display Name)</label>
+                        <input type="text" id="inputUsername" placeholder="Username">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label for="inputProfileImage">Profile Photo URL (Optional)</label>
+                        <input type="text" id="inputProfileImage" placeholder="Leave empty to use first letter photo">
+                        <small style="color:#777; display:block; margin-top:4px;">If left blank, the first letter of your name will be displayed as your profile photo.</small>
+                    </div>
+
+                    <button type="submit" class="btn-red">Update Profile Details</button>
+                    <div class="msg-box msg-success" id="profileSuccessMsg">Profile updated!</div>
+                </form>
+            </div>
+
+            <!-- 3. ORDERS METRICS & QUICK LINK -->
+            <div class="card-box">
+                <h2><span>Orders & Purchases</span></h2>
+                <div class="stat-badge" id="statTotalOrders">0</div>
+                <p>Total pickle orders placed in database.</p>
+                <a href="cart.html" class="btn-dark" style="margin-top:14px;">View Full Order History →</a>
+            </div>
+
+            <!-- 4. YOUR SUBMITTED REVIEWS -->
+            <div class="card-box">
+                <h2><span>Your Product Reviews</span></h2>
+                <div id="userReviewsList"><div style="color:#777;">Loading reviews...</div></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+
+        function renderAvatar(name, imgUrl) {
+            const avatarEl = document.getElementById('heroAvatar');
+            if (imgUrl && imgUrl.trim() !== '') {
+                avatarEl.innerHTML = `<img src="${imgUrl}" alt="Profile Photo">`;
+            } else {
+                const letter = (name || 'User').trim().charAt(0).toUpperCase();
+                avatarEl.textContent = letter;
+            }
+        }
+
+        async function loadProfile() {
+            if (!userId) {
+                alert('Please login first to view your profile.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+                if (!res.ok) throw new Error('User not found');
+
+                const data = await res.json();
+
+                // Update Hero Avatar & Details
+                const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username || 'Customer';
+                document.getElementById('heroName').textContent = fullName;
+                document.getElementById('heroEmail').textContent = `Account ID / Email: ${data.loginId || userId}`;
+                renderAvatar(fullName, data.profileImage);
+
+                // Populate Form Fields
+                document.getElementById('inputFirstName').value = data.firstName || '';
+                document.getElementById('inputLastName').value = data.lastName || '';
+                document.getElementById('inputUsername').value = data.username || '';
+                document.getElementById('inputProfileImage').value = data.profileImage || '';
+
+                // Populate Address Fields
+                const addr = data.addressDetails || {};
+                document.getElementById('inputHouseNo').value = addr.houseNo || '';
+                document.getElementById('inputArea').value = addr.area || '';
+                document.getElementById('inputCity').value = addr.city || '';
+                document.getElementById('inputState').value = addr.state || '';
+                document.getElementById('inputPincode').value = addr.pincode || '';
+                document.getElementById('inputLandmark').value = addr.landmark || '';
+
+                const formattedAddress = data.address || 'No saved address added yet.';
+                document.getElementById('displayFullAddress').textContent = formattedAddress;
+
+                // Stats
+                document.getElementById('statTotalOrders').textContent = data.totalOrders || 0;
+
+                // Render User Reviews
+                const reviewsContainer = document.getElementById('userReviewsList');
+                if (data.userReviews && data.userReviews.length > 0) {
+                    reviewsContainer.innerHTML = data.userReviews.map(r => `
+                        <div class="user-review-item">
+                            <strong>${r.productName} Pickle</strong> - Rating: ${'&#9733;'.repeat(r.rating || 5)}<br>
+                            "${r.reviewText}"
+                        </div>
+                    `).join('');
+                } else {
+                    reviewsContainer.innerHTML = '<div style="color:#777;">You have not posted any product reviews yet.</div>';
+                }
+
+                // Update LocalStorage
+                localStorage.setItem('username', data.username || data.firstName);
+                localStorage.setItem('address', formattedAddress);
+
+            } catch (err) {
+                console.error(err);
+                alert('Error loading profile details from database.');
+            }
+        }
+
+        // SAVE STRUCTURED ADDRESS BLOCKS
+        document.getElementById('addressForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const houseNo = document.getElementById('inputHouseNo').value.trim();
+            const area = document.getElementById('inputArea').value.trim();
+            const city = document.getElementById('inputCity').value.trim();
+            const state = document.getElementById('inputState').value.trim();
+            const pincode = document.getElementById('inputPincode').value.trim();
+            const landmark = document.getElementById('inputLandmark').value.trim();
+
+            if (!houseNo || !city || !state || !pincode) {
+                alert('House No, City, State, and Pincode are required.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        addressDetails: { houseNo, area, city, state, pincode, landmark }
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('addressSuccessMsg').style.display = 'block';
+                    setTimeout(() => { document.getElementById('addressSuccessMsg').style.display = 'none'; }, 2000);
+                    loadProfile();
+                } else {
+                    alert('Failed to save address blocks.');
+                }
+            } catch (err) {
+                alert('Server error saving address.');
+            }
+        });
+
+        // UPDATE PROFILE DETAILS
+        document.getElementById('profileDetailsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('inputFirstName').value.trim();
+            const lastName = document.getElementById('inputLastName').value.trim();
+            const username = document.getElementById('inputUsername').value.trim();
+            const profileImage = document.getElementById('inputProfileImage').value.trim();
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, username, profileImage })
+                });
+
+                if (res.ok) {
+                    document.getElementById('profileSuccessMsg').style.display = 'block';
+                    setTimeout(() => { document.getElementById('profileSuccessMsg').style.display = 'none'; }, 2000);
+                    loadProfile();
+                }
+            } catch (err) {
+                alert('Error updating profile.');
+            }
+        });
+
+        document.getElementById('logoutBtnTop').addEventListener('click', function() {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            localStorage.removeItem('address');
+            window.location.href = 'login.html';
+        });
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+    <script src="checkout.js"></script>
+</body>
+</html>

@@ -23,6 +23,20 @@
         .back-link { text-align: center; margin-top: 16px; }
         .back-link a { color: #333; text-decoration: none; }
         .back-link a:hover { color: #5b9dfa; }
+        .password-field-wrapper { position: relative; }
+        .password-toggle-btn { position: absolute; right: 12px; top: 36px; background: none; border: none; cursor: pointer; color: #666; font-size: 18px; padding: 0; }
+        .password-toggle-btn:hover { color: #333; }
+        .password-constraints { display: none; background: #f9f9f9; border-left: 3px solid #ffc107; padding: 10px; margin-top: 8px; font-size: 12px; color: #666; border-radius: 4px; }
+        .constraint-item { margin: 4px 0; }
+        .constraint-item.met { color: green; }
+        .constraint-item.met::before { content: '✓ '; font-weight: bold; }
+        .constraint-item:not(.met)::before { content: '✗ '; color: #d8000c; font-weight: bold; }
+        .password-confirm-wrapper { display: none; }
+        .confirm-match-message { display: none; margin-top: 6px; font-size: 12px; }
+        .confirm-match-message.match { color: green; }
+        .confirm-match-message.match::before { content: '✓ '; }
+        .confirm-match-message.nomatch { color: #d8000c; }
+        .confirm-match-message.nomatch::before { content: '✗ '; }
     </style>
 </head>
 <body>
@@ -49,7 +63,25 @@
             </div>
             <div class="field">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Max 16 chars: Aa, 1, @" maxlength="16" required>
+                <div class="password-field-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Max 16 chars: Aa, 1, @" maxlength="16" required>
+                    <button type="button" class="password-toggle-btn" id="togglePassword">👁️</button>
+                </div>
+                <div class="password-constraints" id="passwordConstraints">
+                    <div class="constraint-item" id="lengthConstraint">8-16 characters</div>
+                    <div class="constraint-item" id="uppercaseConstraint">At least one uppercase (A-Z)</div>
+                    <div class="constraint-item" id="lowercaseConstraint">At least one lowercase (a-z)</div>
+                    <div class="constraint-item" id="numberConstraint">At least one number (0-9)</div>
+                    <div class="constraint-item" id="specialConstraint">At least one special character (@, #, $, etc)</div>
+                </div>
+            </div>
+            <div class="field password-confirm-wrapper" id="passwordConfirmWrapper">
+                <label for="passwordConfirm">Confirm Password</label>
+                <div class="password-field-wrapper">
+                    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="Re-enter password" maxlength="16">
+                    <button type="button" class="password-toggle-btn" id="togglePasswordConfirm">👁️</button>
+                </div>
+                <div class="confirm-match-message" id="confirmMatchMessage"></div>
             </div>
             <button type="submit" class="submit-btn" id="submitBtn">Sign In</button>
             <div class="message" id="loginMessage">Please enter your email/mobile and password.</div>
@@ -70,8 +102,84 @@ const methodButtons = document.querySelectorAll('.method-btn');
 const userIdInput = document.getElementById('userId');
 const userIdLabel = document.getElementById('userIdLabel');
 const passwordInput = document.getElementById('password');
+const togglePasswordBtn = document.getElementById('togglePassword');
+const togglePasswordConfirmBtn = document.getElementById('togglePasswordConfirm');
+const passwordConfirmInput = document.getElementById('passwordConfirm');
+const passwordConfirmWrapper = document.getElementById('passwordConfirmWrapper');
+const passwordConstraints = document.getElementById('passwordConstraints');
+const confirmMatchMessage = document.getElementById('confirmMatchMessage');
 let isRegisterMode = false;
 let loginMethod = 'email';
+
+// Toggle password visibility
+function togglePasswordVisibility(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
+
+togglePasswordBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    togglePasswordVisibility('password', 'togglePassword');
+});
+
+togglePasswordConfirmBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    togglePasswordVisibility('passwordConfirm', 'togglePasswordConfirm');
+});
+
+// Update password constraints display
+function updatePasswordConstraints() {
+    const pwd = passwordInput.value;
+    const constraints = {
+        length: pwd.length >= 8 && pwd.length <= 16,
+        uppercase: /[A-Z]/.test(pwd),
+        lowercase: /[a-z]/.test(pwd),
+        number: /[0-9]/.test(pwd),
+        special: /[^A-Za-z0-9]/.test(pwd)
+    };
+
+    document.getElementById('lengthConstraint').classList.toggle('met', constraints.length);
+    document.getElementById('uppercaseConstraint').classList.toggle('met', constraints.uppercase);
+    document.getElementById('lowercaseConstraint').classList.toggle('met', constraints.lowercase);
+    document.getElementById('numberConstraint').classList.toggle('met', constraints.number);
+    document.getElementById('specialConstraint').classList.toggle('met', constraints.special);
+
+    // Show constraints only when in register mode and user starts typing
+    if (isRegisterMode && pwd.length > 0) {
+        passwordConstraints.style.display = 'block';
+    } else if (!isRegisterMode) {
+        passwordConstraints.style.display = 'none';
+    }
+}
+
+// Check if passwords match
+function updatePasswordConfirmMatch() {
+    if (!isRegisterMode) return;
+    
+    if (passwordConfirmInput.value.length === 0) {
+        confirmMatchMessage.style.display = 'none';
+        return;
+    }
+
+    confirmMatchMessage.style.display = 'block';
+    if (passwordInput.value === passwordConfirmInput.value) {
+        confirmMatchMessage.textContent = 'Passwords match';
+        confirmMatchMessage.className = 'confirm-match-message match';
+    } else {
+        confirmMatchMessage.textContent = 'Passwords do not match';
+        confirmMatchMessage.className = 'confirm-match-message nomatch';
+    }
+}
+
+passwordInput.addEventListener('input', updatePasswordConstraints);
+passwordConfirmInput.addEventListener('input', updatePasswordConfirmMatch);
 
 function showMessage(message) {
     const msg = document.getElementById('loginMessage');
@@ -110,15 +218,26 @@ function setMode(registerMode) {
     submitBtn.textContent = registerMode ? 'Create Account' : 'Sign In';
     const nameFields = document.getElementById('nameFields');
 
-if (registerMode) {
-    nameFields.style.display = 'block';
-} else {
-    nameFields.style.display = 'none';
-}
+    if (registerMode) {
+        nameFields.style.display = 'block';
+        passwordConfirmWrapper.style.display = 'block';
+        updatePasswordConstraints(); // Show constraints in register mode
+    } else {
+        nameFields.style.display = 'none';
+        passwordConfirmWrapper.style.display = 'none';
+        passwordConstraints.style.display = 'none';
+        confirmMatchMessage.style.display = 'none';
+        passwordConfirmInput.value = '';
+    }
     switchLabel.textContent = registerMode ? 'Already have an account?' : 'New user?';
     modeToggle.textContent = registerMode ? 'Login' : 'Create account';
 
     document.getElementById('loginMessage').style.display = 'none';
+    passwordInput.value = '';
+    passwordInput.type = 'password';
+    passwordConfirmInput.type = 'password';
+    togglePasswordBtn.textContent = '👁️';
+    togglePasswordConfirmBtn.textContent = '👁️';
 }
 
 modeToggle.addEventListener('click', function() {
@@ -162,6 +281,12 @@ function validateForm(userId, password) {
         return false;
     }
 
+    // In register mode, check if passwords match
+    if (isRegisterMode && password !== passwordConfirmInput.value) {
+        showMessage('Passwords do not match.');
+        return false;
+    }
+
     return true;
 }
 
@@ -174,18 +299,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const endpoint = isRegisterMode ? 'register' : 'login';
     let body = { userId, password };
 
-if (isRegisterMode) {
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
+    if (isRegisterMode) {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
 
-    if (!firstName || !lastName) {
-        showMessage("Enter first and last name");
-        return;
+        if (!firstName || !lastName) {
+            showMessage("Enter first and last name");
+            return;
+        }
+
+        body.firstName = firstName;
+        body.lastName = lastName;
     }
-
-    body.firstName = firstName;
-    body.lastName = lastName;
-}
 
     if (!validateForm(userId, password)) {
         return;
@@ -205,14 +330,14 @@ if (isRegisterMode) {
             msg.style.color = 'green';
             msg.style.display = 'block';
 
-          localStorage.setItem('userId', data.userId);
+            localStorage.setItem('userId', data.userId);
 
-// 🔥 IMPORTANT FIX
-localStorage.setItem('username', data.firstName);
+            // 🔥 IMPORTANT FIX
+            localStorage.setItem('username', data.firstName);
 
-if (data.address) {
-    localStorage.setItem('address', data.address);
-}
+            if (data.address) {
+                localStorage.setItem('address', data.address);
+            }
             setTimeout(() => {
                 window.location.href = 'pickle.html';
             }, 1000);

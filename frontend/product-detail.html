@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Pickles Mart</title>
+    <link rel="stylesheet" href="checkout.css">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8f1ea;
+            color: #241f20;
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation - Home Page Style */
+        nav {
+            background: #222;
+            padding: 15px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .nav-links a:hover { color: yellow; }
+
+        .nav-left { position: relative; display: flex; align-items: center; gap: 12px; }
+
+        .hamburger-btn {
+            width: 38px;
+            height: 38px;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            margin: 0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .hamburger-btn img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .hamburger-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+
+        .signin-icon, .cart-icon-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .signin-icon:hover, .cart-icon-btn:hover {
+            background: rgba(255,255,255,0.25);
+            color: yellow;
+        }
+
+        /* Profile Menu Drawer */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 1500;
+        }
+
+        .drawer-overlay.show { display: block; }
+
+        .profile-menu {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            color: #222;
+            box-shadow: 8px 0 24px rgba(0,0,0,0.22);
+            padding: 16px;
+            transform: translateX(-110%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 2000;
+        }
+
+        .profile-menu.show { transform: translateX(0); }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .profile-avatar {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ed1c24;
+            color: white;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .profile-name { font-weight: bold; margin-bottom: 4px; }
+        .profile-label { font-size: 12px; color: #777; }
+
+        .profile-detail {
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            background: #faf7f2;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .menu-links {
+            margin-top: 16px;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+
+        .menu-links a {
+            display: block;
+            color: #222;
+            text-decoration: none;
+            padding: 12px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .menu-links a:hover { background: #f2f2f2; }
+
+        .profile-menu button {
+            width: 100%;
+            padding: 10px;
+            background: #ed1c24;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-top: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            max-width: 1260px;
+            margin: 20px auto 0;
+            padding: 0 24px;
+            font-size: 15px;
+            color: #666;
+        }
+
+        .breadcrumb a { color: #ed1c24; text-decoration: none; font-weight: bold; }
+        .breadcrumb span { margin: 0 8px; color: #aaa; }
+
+        /* Main Container */
+        .container {
+            max-width: 1260px;
+            margin: 24px auto 60px;
+            padding: 0 24px;
+        }
+
+        /* Product Hero Card */
+        .product-section {
+            display: grid;
+            grid-template-columns: minmax(320px, 460px) 1fr;
+            gap: 40px;
+            background: white;
+            padding: 36px;
+            border-radius: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid #e0d6cf;
+        }
+
+        .product-gallery {
+            background: #fff9df;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dfd2c7;
+        }
+
+        .product-gallery img {
+            width: 100%;
+            max-height: 380px;
+            object-fit: contain;
+        }
+
+        .product-info { display: flex; flex-direction: column; }
+
+        .brand {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #ed1c24;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 34px;
+            margin: 0 0 12px;
+            color: #241f20;
+            line-height: 1.1;
+        }
+
+        .product-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .stars { color: #d77c36; font-size: 22px; letter-spacing: 2px; }
+        #reviewCount { color: #555; font-size: 15px; font-weight: bold; }
+
+        .product-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ed1c24;
+            margin-bottom: 14px;
+        }
+
+        .stock-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #2e7d32;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stock-dot { width: 9px; height: 9px; background: #2e7d32; border-radius: 50%; }
+        .delivery-line { font-size: 14px; color: #5c514b; margin-bottom: 20px; }
+
+        .size-label { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: block; color: #241f20; }
+
+        .size-option {
+            width: 100%;
+            max-width: 280px;
+            padding: 10px 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-family: Arial;
+            background: #fff;
+        }
+
+        .purchase-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .quantity-control button {
+            width: 40px;
+            height: 44px;
+            border: none;
+            background: #f2f2f2;
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quantity-control button:hover { background: #e0e0e0; }
+
+        .quantity-control span {
+            width: 44px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .action-btn { background: #241f20; color: white; }
+        .action-btn:hover { background: #444; }
+        .action-btn.primary { background: #ed1c24; color: white; }
+        .action-btn.primary:hover { background: #b9141b; }
+
+        .trust-strip {
+            display: flex;
+            gap: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #5c514b;
+            font-weight: bold;
+        }
+
+        .trust-mark { background: #ed1c24; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; }
+
+        /* Full Description & Details Section */
+        .full-description-section {
+            margin-top: 40px;
+            background: white;
+            padding: 36px;
+            border: 1px solid #e0d6cf;
+        }
+
+        .section-header-title h2, h2.section-title-home {
+            text-align: center;
+            margin: 0 0 32px;
+            font-size: 32px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            color: #241f20;
+        }
+
+        .section-header-title h2 span, h2.section-title-home span {
+            color: #ed1c24;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header-title h2 span::after, h2.section-title-home span::after {
+            content: "";
+            position: absolute;
+            left: 4%;
+            right: 4%;
+            bottom: -8px;
+            height: 5px;
+            border-bottom: 4px solid #ed1c24;
+            border-radius: 50%;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .detail-box {
+            background: #fff9df;
+            padding: 24px;
+            border: 2px dashed #dfd2c7;
+        }
+
+        .detail-box h3 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #ed1c24;
+            margin-bottom: 12px;
+        }
+
+        .detail-box p, .detail-box ul {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #5c514b;
+            margin: 0;
+            padding-left: 0;
+        }
+
+        .detail-box ul { list-style: disc inside; }
+
+        /* Reviews Section (Directly Under Description) */
+        .reviews-section {
+            margin-top: 40px;
+            background: white;
+            padding: 36px;
+            border: 1px solid #e0d6cf;
+        }
+
+        .reviews-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ed1c24;
+            padding-bottom: 14px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .reviews-header-bar h2 { margin: 0; font-size: 26px; color: #241f20; }
+
+        .overall-rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff9df;
+            padding: 8px 18px;
+            border: 2px dashed #dfd2c7;
+        }
+
+        .rating-number { font-size: 24px; font-weight: 800; color: #ed1c24; }
+
+        .write-review {
+            background: #faf7f2;
+            padding: 24px;
+            border: 1px solid #dfd2c7;
+            margin-bottom: 32px;
+        }
+
+        .write-review h3 { margin-top: 0; font-size: 20px; color: #241f20; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 15px; }
+
+        .form-group textarea {
+            width: 100%;
+            min-height: 96px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: Arial;
+        }
+
+        .rating-input { display: flex; align-items: center; gap: 6px; }
+
+        .star-btn {
+            border: none;
+            background: transparent;
+            color: #ccc;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .star-btn.active { color: #d77c36; }
+
+        .btn-submit {
+            background: #ed1c24;
+            color: white;
+            border: none;
+            padding: 12px 26px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover { background: #b9141b; }
+        .success-message { display: none; color: green; margin-top: 12px; font-weight: bold; }
+        .error-message { display: none; color: red; margin-top: 12px; font-weight: bold; }
+
+        .review-card {
+            background: #faf7f2;
+            border-left: 5px solid #ed1c24;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .reviewer-name { font-weight: bold; font-size: 16px; }
+
+        .verified-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .review-date { color: #888; font-size: 13px; }
+        .review-rating { margin-bottom: 8px; }
+        .no-reviews, .loading { color: #666; font-size: 16px; font-style: italic; text-align: center; padding: 20px 0; }
+
+        /* Recommendations Section (Home Page Product Card Style) */
+        .recommendations-section {
+            margin-top: 40px;
+            background: white;
+            padding: 36px;
+            border: 1px solid #e0d6cf;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 28px;
+            margin-top: 24px;
+        }
+
+        /* Match .card from pickle.html */
+        .rec-card {
+            background: white;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid #eee;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+            border-color: #ed1c24;
+        }
+
+        .rec-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .rec-card h3 {
+            font-size: 22px;
+            margin: 10px 0 6px;
+            color: #241f20;
+        }
+
+        .rec-card .stars {
+            color: #d77c36;
+            font-size: 20px;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .rec-card .price {
+            color: #111;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .rec-card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rec-card button {
+            flex: 1;
+            background: #ed1c24;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .rec-card button:hover { background: #b9141b; }
+
+        .rec-card button.btn-secondary {
+            background: #241f20;
+        }
+
+        .rec-card button.btn-secondary:hover { background: #444; }
+
+        @media (max-width: 850px) {
+            .product-section { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV BAR - HOME PAGE STYLE -->
+    <nav>
+        <div class="nav-left">
+            <button class="hamburger-btn" id="profileToggle" type="button" title="Profile">
+                <img src="17583748.svg" alt="Menu">
+            </button>
+            <div class="drawer-overlay" id="drawerOverlay"></div>
+            <div class="profile-menu" id="profileMenu">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar"></div>
+                    <div>
+                        <div class="profile-name" id="profileName">Guest</div>
+                        <div class="profile-label" id="profileLoginId">Please login</div>
+                    </div>
+                </div>
+                <div class="profile-detail">
+                    <strong>Address:</strong>
+                    <div id="profileAddress">Not added</div>
+                    <div style="margin-top:6px;"><strong>Total Orders in DB:</strong> <span id="profileTotalOrders" style="background:green;color:white;padding:2px 6px;border-radius:10px;font-size:12px;">0</span></div>
+                </div>
+                <div class="menu-links">
+                    <a href="profile.html">Profile Account</a>
+                    <a href="veg.html">Veg Pickles</a>
+                    <a href="nonveg.html">Non-Veg Pickles</a>
+                    <a href="cart.html">Cart & Orders</a>
+                </div>
+                <a href="login.html" id="profileLoginLink">Login / Create Account</a>
+                <button type="button" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="pickle.html">Home</a>
+            <a href="veg.html">Veg</a>
+            <a href="nonveg.html">Non-Veg</a>
+            <a href="pickle.html#contact">Contact</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="login.html" class="signin-icon" title="Login">
+                <span id="loginText">Login</span>
+            </a>
+            <a href="cart.html" class="cart-icon-btn" title="Cart">Cart</a>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="pickle.html">Home</a><span>-</span><a id="categoryLink" href="veg.html">Pickles</a><span>-</span><strong id="breadcrumbName">Product</strong>
+    </div>
+
+    <main class="container">
+        <!-- TOP PRODUCT HERO SECTION -->
+        <section class="product-section">
+            <div class="product-gallery">
+                <img id="productImg" src="mango2.webp" alt="Product image">
+            </div>
+
+            <div class="product-info">
+                <div class="brand">Pickles Mart Authentic</div>
+                <h1 id="productName">Product</h1>
+                <div class="product-rating">
+                    <span class="stars" id="productStars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    <span id="reviewCount">(0)</span>
+                </div>
+                <div class="product-price" id="productPrice">Rs. 0.00</div>
+                <div class="stock-line"><span class="stock-dot"></span><span id="stockText">In stock & ready to ship</span></div>
+                <div class="delivery-line">Fast delivery in <strong>2-3 business days</strong></div>
+                <label class="size-label" for="productSizeOption">Select Weight / Size: <span id="productSizeLabel">100g</span></label>
+                <select class="size-option" id="productSizeOption">
+                    <option value="100g">100g</option>
+                    <option value="250g">250g</option>
+                    <option value="500g">500g</option>
+                    <option value="1kg">1kg</option>
+                </select>
+
+                <div class="purchase-row">
+                    <div class="quantity-control" aria-label="Quantity">
+                        <button type="button" id="decreaseQty" aria-label="Decrease quantity">-</button>
+                        <span id="quantityValue">1</span>
+                        <button type="button" id="increaseQty" aria-label="Increase quantity">+</button>
+                    </div>
+                    <button class="action-btn" id="addToCartBtn" type="button">Add to cart</button>
+                    <button class="action-btn primary" id="buyNowBtn" type="button">Buy now</button>
+                </div>
+
+                <div class="trust-strip">
+                    <span><span class="trust-mark">FSSAI</span> Certified</span>
+                    <span>100% Homemade</span>
+                    <span>Secure Checkout</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FULL-WIDTH PRODUCT DESCRIPTION & DETAILS SECTION -->
+        <section class="full-description-section">
+            <div class="section-header-title">
+                <h2><span>Product Details & Description</span></h2>
+            </div>
+            <div class="details-grid">
+                <div class="detail-box">
+                    <h3>About This Pickle</h3>
+                    <p id="detailedDescription">Fresh and tangy pickle prepared with traditional Andhra spices and cold-pressed oil.</p>
+                </div>
+                <div class="detail-box">
+                    <h3>Key Ingredients</h3>
+                    <ul id="ingredientsList">
+                        <li>Fresh Selected Produce</li>
+                        <li>Cold-Pressed Oil</li>
+                        <li>Red Chilli Powder & Mustard Powder</li>
+                        <li>Salt & Fenugreek</li>
+                    </ul>
+                </div>
+                <div class="detail-box">
+                    <h3>Storage & Care</h3>
+                    <p id="storageInfo">Store in a cool, dry place. Always use a clean dry spoon. Keep sealed tight after opening.</p>
+                </div>
+                <div class="detail-box">
+                    <h3>Serving Suggestions</h3>
+                    <p id="usageInfo">Best served with warm rice, ghee, curd rice, dosa, idli, or rotis.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CUSTOMER REVIEWS & RATINGS SECTION (DIRECTLY UNDER DESCRIPTION) -->
+        <section class="reviews-section">
+            <div class="reviews-header-bar">
+                <h2>Customer Reviews & Ratings</h2>
+                <div class="overall-rating-summary" id="overallRatingSummary">
+                    <span class="rating-number" id="ratingAvgNumber">5.0</span>
+                    <span class="stars" id="productStarsSummary">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                    <span id="reviewCountSummary">(0 reviews)</span>
+                </div>
+            </div>
+
+            <div class="write-review" id="writeReviewSection">
+                <h3>Write Your Review</h3>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="rating-input">
+                        <button class="star-btn active" data-rating="1" type="button">&#9733;</button>
+                        <button class="star-btn active" data-rating="2" type="button">&#9733;</button>
+                        <button class="star-btn active" data-rating="3" type="button">&#9733;</button>
+                        <button class="star-btn active" data-rating="4" type="button">&#9733;</button>
+                        <button class="star-btn active" data-rating="5" type="button">&#9733;</button>
+                        <span id="ratingValue" style="font-weight:bold; font-size:18px; margin-left:8px;">5</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reviewText">Your Review</label>
+                    <textarea id="reviewText" placeholder="Share your experience with this pickle..."></textarea>
+                </div>
+                <button class="btn-submit" id="submitReviewBtn" type="button">Submit Review</button>
+                <div class="success-message" id="successMessage">Review submitted successfully!</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div id="reviewsList"><div class="loading">Loading customer reviews...</div></div>
+        </section>
+
+        <!-- AMAZON/HOME-STYLE RECOMMENDATIONS: CUSTOMERS ALSO BOUGHT -->
+        <section class="recommendations-section">
+            <h2 class="section-title-home"><span>Customers Also Bought (Similar Pickles)</span></h2>
+            <div class="recommendations-grid" id="recommendationsGrid">
+                <div class="loading">Loading pickle suggestions...</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Synchronously initialize product name from URL query parameter so loadReviews NEVER fails
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawParamName = urlParams.get('name') || 'Mango Pickle';
+        let productName = rawParamName.replace(/\s+pickle$/i, '').trim() || 'Mango';
+
+        let rating = 5;
+        let quantity = 1;
+        let selectedWeight = '100g';
+        let priceOptions = {};
+
+        const productBasePrices = {
+            Mango: 90, Lemon: 70, Garlic: 85, Tomato: 65, Chilli: 75, Ginger: 80,
+            'Mixed Veg': 95, Teepiavakaya: 90, Sorakaya: 75, Pandumirchi: 90, Oosirikaya: 80,
+            Dabbakaya: 85, Cauliflower: 80, Chicken: 150, Mutton: 240, Prawn: 220,
+            Fish: 170, Crab: 260, Nethallu: 180, Korameenu: 210, Tuna: 220,
+            Kavallu: 190, Kanagadathalu: 210, Vanjaram: 250
+        };
+
+        const weightMultipliers = { '100g': 1, '250g': 2.5, '500g': 5, '1kg': 10 };
+
+        const productDetails = {
+            Mango: {
+                description: 'Classic Andhra mango pickle with bright tang, warm spice, and a rich homemade oil blend.',
+                detailed: 'Crafted using hand-picked raw green mangoes, cold-pressed oil, aromatic mustard seeds, red chilli powder, and traditional spices.',
+                ingredients: ['Raw Green Mangoes', 'Cold-Pressed Oil', 'Red Chilli Powder', 'Mustard Powder', 'Garlic', 'Salt', 'Fenugreek'],
+                storage: 'Store in a cool dry place. Use dry spoon only. Shelf life: 12 months.',
+                usage: 'Pairs perfectly with hot rice, ghee, curd rice, dosas, and breakfast items.'
+            },
+            Lemon: {
+                description: 'Zesty lemon pickle made for curd rice, dal rice, dosa, and everyday comfort meals.',
+                detailed: 'Sun-cured juicy lemons blended with traditional spices to give a perfect balance of sour, salty, and spicy notes.',
+                ingredients: ['Fresh Lemons', 'Red Chilli Powder', 'Salt', 'Turmeric', 'Mustard Powder', 'Gingelly Oil'],
+                storage: 'Keep in glass container. Store away from moisture.',
+                usage: 'Ideal companion for curd rice, dal rice, and parathas.'
+            },
+            Chicken: {
+                description: 'Spicy chicken pickle packed with non-veg flavor and Andhra-style masala.',
+                detailed: 'Boneless tender chicken pieces slow-cooked with freshly ground spices, ginger-garlic paste, and traditional chilli masala.',
+                ingredients: ['Boneless Chicken', 'Cold-Pressed Oil', 'Ginger Garlic Paste', 'Red Chilli Powder', 'Garam Masala', 'Lemon Juice', 'Salt'],
+                storage: 'Refrigerate after opening for extended freshness.',
+                usage: 'Enjoy with hot steamed rice, biryani, or rotis.'
+            }
+        };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function formatPrice(value) {
+            const price = Number(value) || 0;
+            return `Rs. ${price.toFixed(2)}`;
+        }
+
+        function renderStars(ratingValue) {
+            const count = Math.min(Math.max(Math.round(Number(ratingValue) || 5), 1), 5);
+            return '&#9733;'.repeat(count) + '&#9734;'.repeat(5 - count);
+        }
+
+        function getBasePrice(name) {
+            return Number(priceOptions[selectedWeight]) || (productBasePrices[name] ? productBasePrices[name] * (weightMultipliers[selectedWeight] || 1) : 100);
+        }
+
+        function getProductFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const rawName = params.get('name') || 'Mango Pickle';
+            const cleanName = rawName.replace(/\s+pickle$/i, '').trim() || 'Mango';
+            const price = getBasePrice(cleanName);
+            const image = params.get('image') || `${cleanName.toLowerCase()}.webp`;
+            const description = params.get('description') || 'Fresh Pickles Mart flavor made for everyday meals.';
+
+            return { name: cleanName, price, image, description, weight: selectedWeight };
+        }
+
+        async function fetchProductFromDatabase(name) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/products/${encodeURIComponent(name)}`);
+                if (!res.ok) return null;
+                return await res.json();
+            } catch (err) {
+                console.error('Error fetching DB product:', err);
+                return null;
+            }
+        }
+
+        function productCategory(name) {
+            const nonVegNames = ['Chicken', 'Mutton', 'Prawn', 'Fish', 'Crab', 'Nethallu', 'Korameenu', 'Tuna', 'Kavallu', 'Kanagadathalu', 'Vanjaram'];
+            return nonVegNames.some(item => name.toLowerCase().includes(item.toLowerCase())) ? 'nonveg.html' : 'veg.html';
+        }
+
+        function displayProduct() {
+            const product = getProductFromUrl();
+            productName = product.name;
+            const details = productDetails[product.name] || {
+                description: product.description,
+                detailed: product.description || 'Premium quality pickle prepared with authentic spices and natural oil.',
+                ingredients: ['Selected Produce', 'Cold-Pressed Oil', 'Red Chilli Powder', 'Mustard Seeds', 'Salt'],
+                storage: 'Store in a cool, dry place. Keep sealed tight.',
+                usage: 'Best enjoyed with hot rice, ghee, or breakfast items.'
+            };
+
+            document.title = `${product.name} Pickle - Pickles Mart`;
+            document.getElementById('productName').textContent = `${product.name} Pickle`;
+            document.getElementById('breadcrumbName').textContent = `${product.name} Pickle`;
+            document.getElementById('productPrice').textContent = formatPrice(product.price);
+            document.getElementById('productImg').src = product.image;
+            document.getElementById('productImg').alt = product.name;
+            document.getElementById('categoryLink').href = productCategory(product.name);
+
+            document.getElementById('detailedDescription').textContent = details.detailed;
+            document.getElementById('ingredientsList').innerHTML = details.ingredients.map(ing => `<li>${escapeHtml(ing)}</li>`).join('');
+            document.getElementById('storageInfo').textContent = details.storage;
+            document.getElementById('usageInfo').textContent = details.usage;
+
+            document.getElementById('productSizeLabel').textContent = product.weight;
+        }
+
+        async function initializeProduct() {
+            const dbProduct = await fetchProductFromDatabase(productName);
+            if (dbProduct && dbProduct.priceOptions) {
+                priceOptions = dbProduct.priceOptions;
+            }
+
+            displayProduct();
+            loadReviews();
+            loadRecommendations(productName);
+        }
+
+        function updateQuantity(nextQuantity) {
+            quantity = Math.max(1, Math.min(10, nextQuantity));
+            document.getElementById('quantityValue').textContent = quantity;
+        }
+
+        async function addCurrentProductToCart(redirectAfterAdd) {
+            const product = getProductFromUrl();
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('Please login to continue');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:5000/api/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId,
+                        name: product.name,
+                        price: product.price,
+                        weight: selectedWeight,
+                        qty: quantity
+                    })
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    alert(data.message || 'Failed to add item to cart');
+                    return;
+                }
+
+                if (redirectAfterAdd) {
+                    window.location.href = 'cart.html';
+                } else {
+                    alert(`${product.name} Pickle added to cart!`);
+                }
+            } catch (err) {
+                alert('Server error adding product to cart');
+            }
+        }
+
+        // 🔥 LOAD REVIEWS (GUARANTEED TO LOAD IMMEDIATELY)
+        function loadReviews() {
+            const reviewsList = document.getElementById('reviewsList');
+            if (!productName) {
+                reviewsList.innerHTML = '<div class="no-reviews">Select a product to see reviews</div>';
+                return;
+            }
+
+            fetch(`http://localhost:5000/api/reviews/product/${encodeURIComponent(productName)}`)
+                .then(res => res.json())
+                .then(reviews => {
+                    const safeReviews = Array.isArray(reviews) ? reviews : [];
+                    const countText = `(${safeReviews.length})`;
+                    document.getElementById('reviewCount').textContent = countText;
+                    document.getElementById('reviewCountSummary').textContent = `(${safeReviews.length} reviews)`;
+
+                    if (!safeReviews.length) {
+                        document.getElementById('productStars').innerHTML = renderStars(5);
+                        document.getElementById('productStarsSummary').innerHTML = renderStars(5);
+                        document.getElementById('ratingAvgNumber').textContent = '5.0';
+                        reviewsList.innerHTML = '<div class="no-reviews">Be the first to write a review for this pickle!</div>';
+                        return;
+                    }
+
+                    const averageRating = (safeReviews.reduce((total, review) => total + (Number(review.rating) || 5), 0) / safeReviews.length).toFixed(1);
+                    document.getElementById('ratingAvgNumber').textContent = averageRating;
+                    document.getElementById('productStars').innerHTML = renderStars(Math.round(averageRating));
+                    document.getElementById('productStarsSummary').innerHTML = renderStars(Math.round(averageRating));
+
+                    reviewsList.innerHTML = safeReviews.map(review => `
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div>
+                                    <div class="reviewer-name">${escapeHtml(review.username || 'Customer')}${review.verified ? '<span class="verified-badge">Verified Purchaser</span>' : ''}</div>
+                                    <div class="review-rating">${renderStars(Number(review.rating) || 5)}</div>
+                                </div>
+                                <div class="review-date">${new Date(review.createdAt).toLocaleDateString()}</div>
+                            </div>
+                            <div>${escapeHtml(review.reviewText || '')}</div>
+                        </div>
+                    `).join('');
+                })
+                .catch(() => {
+                    reviewsList.innerHTML = '<div class="no-reviews">Unable to load reviews right now.</div>';
+                });
+        }
+
+        // 🔥 AMAZON/HOME-STYLE RECOMMENDATIONS LOADER
+        async function loadRecommendations(currentName) {
+            const grid = document.getElementById('recommendationsGrid');
+            if (!grid) return;
+
+            try {
+                const res = await fetch('http://localhost:5000/api/products');
+                if (!res.ok) throw new Error('Failed to load products');
+                const products = await res.json();
+
+                const filtered = products.filter(p => p.name.toLowerCase() !== (currentName || '').toLowerCase());
+                const items = filtered.slice(0, 4);
+
+                if (!items.length) {
+                    grid.innerHTML = '<div class="no-reviews">No suggestions found.</div>';
+                    return;
+                }
+
+                grid.innerHTML = items.map(p => `
+                    <div class="rec-card" onclick="goToProductDetails('${escapeHtml(p.name)}', ${p.basePrice}, '${escapeHtml(p.image)}')">
+                        <div>
+                            <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">
+                            <h3>${escapeHtml(p.name)} Pickle</h3>
+                            <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                            <div class="price">Rs. ${p.basePrice.toFixed(2)}</div>
+                        </div>
+                        <div class="rec-card-actions">
+                            <button type="button" class="btn-secondary" onclick="event.stopPropagation(); goToProductDetails('${escapeHtml(p.name)}', ${p.basePrice}, '${escapeHtml(p.image)}')">View</button>
+                            <button type="button" onclick="event.stopPropagation(); addProductToCart('${escapeHtml(p.name)}', ${p.basePrice})">Add to cart</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = '<div class="no-reviews">Unable to load pickle suggestions right now.</div>';
+            }
+        }
+
+        function goToProductDetails(name, price, image) {
+            const params = new URLSearchParams({
+                name: name,
+                price: `Rs. ${price}`,
+                image: image
+            });
+            window.location.href = `product-detail.html?${params.toString()}`;
+        }
+
+        async function addProductToCart(name, price) {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('Please login first to add items to your cart.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:5000/api/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, name, price: Number(price), qty: 1, weight: '100g' })
+                });
+                if (res.ok) {
+                    alert(`${name} Pickle added to cart!`);
+                } else {
+                    alert('Failed to add product to cart.');
+                }
+            } catch (err) {
+                alert('Server error adding item to cart.');
+            }
+        }
+
+        async function updateProfile() {
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username') || 'Guest';
+            const profileName = document.getElementById('profileName');
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileLoginId = document.getElementById('profileLoginId');
+            const profileAddress = document.getElementById('profileAddress');
+            const profileTotalOrders = document.getElementById('profileTotalOrders');
+            const profileLoginLink = document.getElementById('profileLoginLink');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const writeReviewSection = document.getElementById('writeReviewSection');
+            const signinIcon = document.querySelector('.signin-icon');
+
+            if (userId) {
+                profileName.textContent = username;
+                profileAvatar.textContent = username.charAt(0);
+                profileAvatar.style.display = 'flex';
+                profileLoginId.textContent = userId;
+                profileLoginLink.style.display = 'none';
+                logoutBtn.style.display = 'block';
+                writeReviewSection.style.display = 'block';
+                if (signinIcon) signinIcon.style.display = 'none';
+
+                try {
+                    const res = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+                    if (res.ok) {
+                        const userData = await res.json();
+                        if (userData.address) {
+                            localStorage.setItem('address', userData.address);
+                            if (profileAddress) profileAddress.textContent = userData.address;
+                        }
+                        if (userData.username) {
+                            localStorage.setItem('username', userData.username);
+                            profileName.textContent = userData.username;
+                            profileAvatar.textContent = userData.username.charAt(0);
+                        }
+                        if (profileTotalOrders) {
+                            profileTotalOrders.textContent = userData.totalOrders || 0;
+                        }
+                    }
+                } catch (err) {
+                    console.log('Error fetching DB metrics:', err);
+                }
+            } else {
+                profileAvatar.style.display = 'none';
+                profileLoginLink.style.display = 'block';
+                logoutBtn.style.display = 'none';
+                writeReviewSection.style.display = 'none';
+                if (signinIcon) signinIcon.style.display = 'flex';
+                if (profileAddress) profileAddress.textContent = 'Not added';
+                if (profileTotalOrders) profileTotalOrders.textContent = '0';
+            }
+        }
+
+        function showMessage(id, message) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        // Event Listeners
+        document.getElementById('productSizeOption').addEventListener('change', function(e) {
+            selectedWeight = e.target.value;
+            displayProduct();
+        });
+
+        document.getElementById('decreaseQty').addEventListener('click', () => updateQuantity(quantity - 1));
+        document.getElementById('increaseQty').addEventListener('click', () => updateQuantity(quantity + 1));
+
+        document.getElementById('addToCartBtn').addEventListener('click', () => addCurrentProductToCart(false));
+        document.getElementById('buyNowBtn').addEventListener('click', () => {
+            const product = getProductFromUrl();
+            PickleMartCheckout.startBuyNow({
+                name: product.name,
+                price: product.price,
+                weight: selectedWeight,
+                qty: quantity,
+                image: product.image
+            });
+        });
+
+        document.querySelectorAll('.star-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                rating = Number(this.dataset.rating) || 5;
+                document.getElementById('ratingValue').textContent = rating;
+                document.querySelectorAll('.star-btn').forEach((star, index) => {
+                    star.classList.toggle('active', index < rating);
+                });
+            });
+        });
+
+        document.getElementById('submitReviewBtn').addEventListener('click', async function() {
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username') || 'Anonymous';
+            const reviewText = document.getElementById('reviewText').value.trim();
+
+            if (!userId) {
+                showMessage('errorMessage', 'Please login to submit a review.');
+                return;
+            }
+
+            if (!reviewText) {
+                showMessage('errorMessage', 'Review text cannot be empty.');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:5000/api/reviews/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId,
+                        username,
+                        productName,
+                        rating,
+                        reviewText,
+                        weight: selectedWeight
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    showMessage('errorMessage', data.message || data.error || 'Failed to submit review.');
+                    return;
+                }
+
+                document.getElementById('reviewText').value = '';
+                rating = 5;
+                document.getElementById('ratingValue').textContent = '5';
+                document.querySelectorAll('.star-btn').forEach((star, index) => {
+                    star.classList.toggle('active', index < 5);
+                });
+                showMessage('successMessage', 'Review submitted successfully!');
+                
+                setTimeout(() => {
+                    loadReviews();
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 1200);
+            } catch (err) {
+                showMessage('errorMessage', 'Failed to submit review. Please try again.');
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            localStorage.removeItem('address');
+            location.reload();
+        });
+
+        document.getElementById('profileToggle').addEventListener('click', function() {
+            document.getElementById('profileMenu').classList.toggle('show');
+            document.getElementById('drawerOverlay').classList.toggle('show');
+        });
+
+        document.getElementById('drawerOverlay').addEventListener('click', function() {
+            document.getElementById('profileMenu').classList.remove('show');
+            document.getElementById('drawerOverlay').classList.remove('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateQuantity(1);
+            updateProfile();
+            initializeProduct();
+        });
+    </script>
+    <script src="checkout.js"></script>
+</body>
+</html>

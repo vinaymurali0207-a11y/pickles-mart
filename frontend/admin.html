@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickle Mart Admin</title>
+    <style>
+        :root { --red:#ed1c24; --ink:#241f20; --cream:#fff8f0; --green:#176b35; }
+        * { box-sizing:border-box; }
+        body { margin:0; font-family:Arial,sans-serif; color:var(--ink); background:var(--cream); }
+        header { background:#222; color:#fff; padding:18px 5%; display:flex; justify-content:space-between; align-items:center; gap:15px; }
+        header h1 { margin:0; font-size:22px; }
+        button { border:0; border-radius:6px; padding:10px 15px; cursor:pointer; font-weight:bold; }
+        .btn-primary { background:var(--green); color:#fff; }
+        .btn-danger { background:var(--red); color:#fff; }
+        .btn-light { background:#eee; color:#222; }
+        .page { max-width:1400px; margin:25px auto; padding:0 20px; }
+        .panel { background:#fff; border-radius:12px; padding:22px; box-shadow:0 3px 14px #00000012; }
+        .login-panel { max-width:430px; margin:70px auto; }
+        label { display:block; margin:13px 0 6px; font-weight:bold; font-size:14px; }
+        input, select { width:100%; padding:11px; border:1px solid #d6cec7; border-radius:6px; font:inherit; background:#fff; }
+        .error { color:#b00020; min-height:20px; margin:12px 0 0; }
+        .toolbar { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:20px; }
+        .toolbar label { margin:0 0 6px; }
+        .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+        .stat { background:#fff; border-left:5px solid var(--red); border-radius:8px; padding:16px; box-shadow:0 3px 14px #0000000d; }
+        .stat small { color:#666; display:block; }
+        .stat strong { display:block; font-size:25px; margin-top:5px; }
+        .table-wrap { overflow:auto; }
+        table { width:100%; border-collapse:collapse; min-width:1050px; }
+        th,td { text-align:left; padding:12px 10px; border-bottom:1px solid #eee; vertical-align:top; }
+        th { background:#f7efe8; white-space:nowrap; }
+        td select { min-width:150px; padding:7px; }
+        .order-id { font-family:monospace; font-size:12px; color:#555; }
+        .items { margin:0; padding-left:18px; }
+        .muted { color:#777; font-size:13px; }
+        .hidden { display:none !important; }
+        @media (max-width:800px) {
+            .toolbar,.stats { grid-template-columns:1fr 1fr; }
+            .stats .stat:last-child { grid-column:span 2; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pickle Mart Admin Dashboard</h1>
+        <button id="logoutBtn" class="btn-danger hidden" type="button">Logout</button>
+    </header>
+
+    <main class="page">
+        <section id="loginPanel" class="panel login-panel">
+            <h2>Admin Login</h2>
+            <p class="muted">Use the admin credentials configured in <code>backend/.env</code>.</p>
+            <form id="loginForm">
+                <label for="adminUserId">Admin ID</label>
+                <input id="adminUserId" type="text" autocomplete="username" required>
+                <label for="adminPassword">Password</label>
+                <input id="adminPassword" type="password" autocomplete="current-password" required>
+                <p id="loginError" class="error"></p>
+                <button class="btn-primary" type="submit">Sign in</button>
+            </form>
+        </section>
+
+        <section id="dashboard" class="hidden">
+            <div class="stats">
+                <div class="stat"><small>Total Orders</small><strong id="totalOrders">0</strong></div>
+                <div class="stat"><small>Pending Payments</small><strong id="pendingPayments">0</strong></div>
+                <div class="stat"><small>Paid Orders</small><strong id="paidPayments">0</strong></div>
+                <div class="stat"><small>Delivered</small><strong id="deliveredOrders">0</strong></div>
+                <div class="stat"><small>Cancelled</small><strong id="cancelledOrders">0</strong></div>
+            </div>
+
+            <section class="panel">
+                <div class="toolbar">
+                    <div><label for="searchInput">Search</label><input id="searchInput" placeholder="Order ID, customer, product, payment ID"></div>
+                    <div><label for="statusFilter">Delivery status</label><select id="statusFilter"><option value="">All statuses</option><option>Order Placed</option><option>Payment Confirmed</option><option>Processing</option><option>Shipped</option><option>Out for Delivery</option><option>Delivered</option><option>Cancelled</option></select></div>
+                    <div><label for="paymentFilter">Payment status</label><select id="paymentFilter"><option value="">All payments</option><option>Pending</option><option>Paid</option><option>Failed</option><option>Refunded</option></select></div>
+                    <button id="refreshBtn" class="btn-primary" type="button">Refresh</button>
+                </div>
+                <p id="dashboardError" class="error"></p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Delivery</th><th>Save</th></tr></thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const API = 'http://localhost:5000/api/admin';
+        const tokenKey = 'picklemartAdminToken';
+        const statuses = ['Order Placed', 'Payment Confirmed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
+        const paymentStatuses = ['Pending', 'Paid', 'Failed', 'Refunded'];
+        const $ = id => document.getElementById(id);
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch]));
+        }
+
+        async function request(path, options = {}) {
+            const response = await fetch(API + path, {
+                ...options,
+                headers: { 'Content-Type':'application/json', ...(options.headers || {}), Authorization:'Bearer ' + sessionStorage.getItem(tokenKey) }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 401) { logout(); throw new Error(data.message || 'Admin session expired'); }
+            if (!response.ok) throw new Error(data.message || 'Request failed');
+            return data;
+        }
+
+        function logout() {
+            sessionStorage.removeItem(tokenKey);
+            $('dashboard').classList.add('hidden');
+            $('loginPanel').classList.remove('hidden');
+            $('logoutBtn').classList.add('hidden');
+        }
+
+        function selectHtml(values, current) {
+            return values.map(value => `<option ${value === current ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('');
+        }
+
+        function renderOrders(orders) {
+            $('ordersBody').innerHTML = orders.length ? orders.map(order => {
+                const customer = order.user?.username || order.user?.firstName || order.userId || 'Customer';
+                const itemLines = (order.items || []).map(item => `${escapeHtml(item.name)} × ${Number(item.qty) || 1}`).join('<br>');
+                return `<tr data-id="${escapeHtml(order._id)}">
+                    <td><div class="order-id">${escapeHtml(order._id)}</div><div class="muted">${order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}</div></td>
+                    <td><strong>${escapeHtml(customer)}</strong><br><span class="muted">${escapeHtml(order.user?.userId || order.userId || '')}</span></td>
+                    <td><ul class="items"><li>${itemLines || 'No items'}</li></ul></td>
+                    <td><strong>₹${Number(order.totalAmount || order.subtotal || 0).toFixed(2)}</strong></td>
+                    <td><select class="payment-status">${selectHtml(paymentStatuses, order.paymentStatus || 'Pending')}</select><div class="muted">${escapeHtml(order.paymentMethod || '')}</div></td>
+                    <td><select class="delivery-status">${selectHtml(statuses, order.status || 'Order Placed')}</select><input class="estimate" value="${escapeHtml(order.deliveryEstimate || '')}" placeholder="Delivery estimate" style="margin-top:6px"></td>
+                    <td><button class="btn-primary save-order" type="button">Save</button><div class="muted save-message"></div></td>
+                </tr>`;
+            }).join('') : '<tr><td colspan="7" class="muted">No orders found.</td></tr>';
+        }
+
+        async function loadDashboard() {
+            $('dashboardError').textContent = '';
+            try {
+                const params = new URLSearchParams();
+                if ($('searchInput').value.trim()) params.set('q', $('searchInput').value.trim());
+                if ($('statusFilter').value) params.set('status', $('statusFilter').value);
+                if ($('paymentFilter').value) params.set('paymentStatus', $('paymentFilter').value);
+                const [stats, result] = await Promise.all([request('/stats'), request('/orders?' + params.toString())]);
+                Object.entries(stats).forEach(([key, value]) => { if ($(key)) $(key).textContent = value; });
+                renderOrders(result.orders || []);
+            } catch (err) { $('dashboardError').textContent = err.message; }
+        }
+
+        $('loginForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            $('loginError').textContent = '';
+            try {
+                const response = await fetch(API + '/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userId:$('adminUserId').value.trim(), password:$('adminPassword').value }) });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.message || 'Login failed');
+                sessionStorage.setItem(tokenKey, data.token);
+                $('loginPanel').classList.add('hidden'); $('dashboard').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden');
+                loadDashboard();
+            } catch (err) { $('loginError').textContent = err.message; }
+        });
+
+        $('ordersBody').addEventListener('click', async event => {
+            if (!event.target.classList.contains('save-order')) return;
+            const row = event.target.closest('tr');
+            const message = row.querySelector('.save-message');
+            event.target.disabled = true;
+            try {
+                await request('/orders/' + encodeURIComponent(row.dataset.id), { method:'PATCH', body:JSON.stringify({ status:row.querySelector('.delivery-status').value, paymentStatus:row.querySelector('.payment-status').value, deliveryEstimate:row.querySelector('.estimate').value.trim() }) });
+                message.textContent = 'Saved'; message.style.color = 'green';
+                loadDashboard();
+            } catch (err) { message.textContent = err.message; message.style.color = '#b00020'; }
+            event.target.disabled = false;
+        });
+
+        $('refreshBtn').addEventListener('click', loadDashboard);
+        $('statusFilter').addEventListener('change', loadDashboard);
+        $('paymentFilter').addEventListener('change', loadDashboard);
+        $('searchInput').addEventListener('keydown', event => { if (event.key === 'Enter') loadDashboard(); });
+        $('logoutBtn').addEventListener('click', logout);
+
+        if (sessionStorage.getItem(tokenKey)) { $('loginPanel').classList.add('hidden'); $('dashboard').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); loadDashboard(); }
+    </script>
+</body>
+</html>

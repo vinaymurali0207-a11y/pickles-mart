@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Pickles Mart - Veg Pickles</title>
+<link rel="stylesheet" href="checkout.css">
 <style>
 body { margin: 0; font-family: Arial; background: #fff6e6; }
 nav { background: #222; padding: 15px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; }
@@ -42,6 +43,7 @@ nav { background: #222; padding: 15px; position: sticky; top: 0; display: flex; 
 .search-icon { text-decoration: none; margin-right: 20px; display: inline-block; padding: 4px; border-radius: 50%; }
 .search-icon:hover { background: rgba(255, 255, 255, 0.2); }
 .search-icon:hover svg { stroke: rgb(250, 250, 249); }
+.search-icon svg, .cart svg { width: 24px; height: 24px; display: block; }
 .cart { text-decoration: none; margin-left: 5px; display: inline-block; padding: 4px; border-radius: 50%; }
 .cart:hover { background: rgba(255, 255, 255, 0.2); }
 .cart:hover svg { stroke: rgb(250, 250, 249); }
@@ -57,6 +59,114 @@ h2 { text-align: center; margin-bottom: 20px; }
 .card img { width: 100%; height: 130px; border-radius: 8px; object-fit: cover; }
 button { background: green; color: white; border: none; padding: 8px; margin-top: 8px; border-radius: 6px; cursor: pointer; }
 button:hover { background: darkgreen; }
+
+.card {
+    cursor: pointer;
+}
+
+.product-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.product-modal-overlay.show {
+    display: flex;
+}
+
+.product-modal {
+    width: min(760px, 96vw);
+    background: #fffaf2;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    padding: 28px;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1fr);
+    gap: 28px;
+    align-items: center;
+}
+
+.product-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    font-size: 22px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.product-modal img {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.product-modal h2 {
+    text-align: left;
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+.product-modal-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f7a3c;
+    margin: 0 0 14px;
+}
+
+.product-modal-description {
+    color: #4b413c;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.product-modal-add {
+    margin-top: 16px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.card-actions button {
+    width: 100%;
+    margin-top: 0;
+}
+
+.card-actions .buy-now-btn {
+    background: #ed1c24;
+}
+
+.card-actions .buy-now-btn:hover {
+    background: #b9141b;
+}
+
+@media (max-width: 620px) {
+    .product-modal {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 </head>
 <body>
@@ -77,6 +187,7 @@ button:hover { background: darkgreen; }
             <div class="profile-detail">
                 <strong>Address:</strong>
                 <div id="profileAddress">Not added</div>
+                <div style="margin-top:6px;"><strong>Total Orders in DB:</strong> <span id="profileTotalOrders" style="background:green;color:white;padding:2px 6px;border-radius:10px;font-size:12px;">0</span></div>
             </div>
             <div class="profile-form" id="profileForm">
                 <label for="profileUsernameInput">Username</label>
@@ -88,7 +199,7 @@ button:hover { background: darkgreen; }
             </div>
             <div class="menu-links">
                 <a href="pickle.html">Home</a>
-                <a href="#" id="profileLink">Profile</a>
+                <a href="profile.html" id="profileLink">Profile Account</a>
                 <a href="veg.html">Veg</a>
                 <a href="nonveg.html">Non-Veg</a>
                 <a href="cart.html">Cart</a>
@@ -116,7 +227,7 @@ button:hover { background: darkgreen; }
         <a href="#" class="search-icon" title="Search">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="14" y2="14"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
         </a>
         <a href="cart.html" class="cart" id="cartLink" title="View Cart">
@@ -137,21 +248,34 @@ button:hover { background: darkgreen; }
 <section>
 <h2>Veg Pickles</h2>
 <div class="products">
-<div class="card"><img src="mango2.webp" alt="Mango Pickle"><h3>Mango</h3><p>₹199</p><button>Buy</button></div>
-<div class="card"><img src="lemon.webp" alt="Lemon Pickle"><h3>Lemon</h3><p>₹149</p><button>Buy</button></div>
-<div class="card"><img src="Garlic.jpeg" alt="Garlic Pickle"><h3>Garlic</h3><p>₹179</p><button>Buy</button></div>
-<div class="card"><img src="tomato.webp" alt="Tomato Pickle"><h3>Tomato</h3><p>₹129</p><button>Buy</button></div>
-<div class="card"><img src="chilli.webp" alt="Chilli Pickle"><h3>Chilli</h3><p>₹139</p><button>Buy</button></div>
-<div class="card"><img src="ginger.webp" alt="Ginger Pickle"><h3>Ginger</h3><p>₹159</p><button>Buy</button></div>
-<div class="card"><img src="mixed veg.webp" alt="Mixed Veg Pickle"><h3>Mixed Veg</h3><p>₹199</p><button>Buy</button></div>
-<div class="card"><img src="Teepiavakaya.png" alt="Teepiavakaya Pickle"><h3>Teepiavakaya</h3><p>₹169</p><button>Buy</button></div>
-<div class="card"><img src="Sorakaya.png" alt="Sorakaya Pickle"><h3>Sorakaya</h3><p>₹189</p><button>Buy</button></div>
-<div class="card"><img src="Pandumirchi.png" alt="Pandumirchi Pickle"><h3>Pandumirchi</h3><p>₹179</p><button>Buy</button></div>
-<div class="card"><img src="Oosirikaya.png" alt="Oosirikaya Pickle"><h3>Oosirikaya</h3><p>₹159</p><button>Buy</button></div>
-<div class="card"><img src="Dabbakaya.png" alt="Dabbakaya Pickle"><h3>Dabbakaya</h3><p>₹189</p><button>Buy</button></div>
-<div class="card"><img src="Cauliflower.png" alt="Cauliflower Pickle"><h3>Cauliflower</h3><p>₹149</p><button>Buy</button></div>
+<div class="card" onclick="goToProduct('Mango', '₹199', 'mango2.webp')"><img src="mango2.webp" alt="Mango Pickle"><h3>Mango</h3><p>₹199</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Lemon', '₹149', 'lemon.webp')"><img src="lemon.webp" alt="Lemon Pickle"><h3>Lemon</h3><p>₹149</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Garlic', '₹179', 'Garlic.jpeg')"><img src="Garlic.jpeg" alt="Garlic Pickle"><h3>Garlic</h3><p>₹179</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Tomato', '₹129', 'tomato.webp')"><img src="tomato.webp" alt="Tomato Pickle"><h3>Tomato</h3><p>₹129</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Chilli', '₹139', 'chilli.webp')"><img src="chilli.webp" alt="Chilli Pickle"><h3>Chilli</h3><p>₹139</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Ginger', '₹159', 'ginger.webp')"><img src="ginger.webp" alt="Ginger Pickle"><h3>Ginger</h3><p>₹159</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Mixed Veg', '₹199', 'mixed veg.webp')"><img src="mixed veg.webp" alt="Mixed Veg Pickle"><h3>Mixed Veg</h3><p>₹199</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Teepiavakaya', '₹169', 'Teepiavakaya.png')"><img src="Teepiavakaya.png" alt="Teepiavakaya Pickle"><h3>Teepiavakaya</h3><p>₹169</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Sorakaya', '₹189', 'Sorakaya.png')"><img src="Sorakaya.png" alt="Sorakaya Pickle"><h3>Sorakaya</h3><p>₹189</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Pandumirchi', '₹179', 'Pandumirchi.png')"><img src="Pandumirchi.png" alt="Pandumirchi Pickle"><h3>Pandumirchi</h3><p>₹179</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Oosirikaya', '₹159', 'Oosirikaya.png')"><img src="Oosirikaya.png" alt="Oosirikaya Pickle"><h3>Oosirikaya</h3><p>₹159</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Dabbakaya', '₹189', 'Dabbakaya.png')"><img src="Dabbakaya.png" alt="Dabbakaya Pickle"><h3>Dabbakaya</h3><p>₹189</p><button>View Details</button></div>
+<div class="card" onclick="goToProduct('Cauliflower', '₹149', 'Cauliflower.png')"><img src="Cauliflower.png" alt="Cauliflower Pickle"><h3>Cauliflower</h3><p>₹149</p><button>View Details</button></div>
 </div>
 </section>
+
+<div class="product-modal-overlay" id="productModal" aria-hidden="true">
+    <div class="product-modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+        <button class="product-modal-close" id="productModalClose" type="button" aria-label="Close product details">&times;</button>
+        <img id="productModalImage" src="" alt="">
+        <div>
+            <h2 id="productModalTitle"></h2>
+            <p class="product-modal-price" id="productModalPrice"></p>
+            <p class="product-modal-description" id="productModalDescription"></p>
+            <button class="product-modal-add" id="productModalAdd" type="button">Add to Cart</button>
+        </div>
+    </div>
+</div>
 <script>
     console.log("SCRIPT LOADED");
 const routeMap = {
@@ -276,7 +400,7 @@ function updateLoginDisplay() {
     }
 }
 
-function updateProfileMenu() {
+async function updateProfileMenu() {
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
     const address = localStorage.getItem('address');
@@ -284,6 +408,7 @@ function updateProfileMenu() {
     const profileName = document.getElementById('profileName');
     const profileLoginId = document.getElementById('profileLoginId');
     const profileAddress = document.getElementById('profileAddress');
+    const profileTotalOrders = document.getElementById('profileTotalOrders');
     const profileLoginLink = document.getElementById('profileLoginLink');
     const logoutBtn = document.getElementById('logoutBtn');
 
@@ -296,12 +421,34 @@ function updateProfileMenu() {
         profileAddress.textContent = address && address !== 'undefined' ? address : 'Not added';
         profileLoginLink.style.display = 'none';
         logoutBtn.style.display = 'block';
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+            if (res.ok) {
+                const userData = await res.json();
+                if (userData.address) {
+                    localStorage.setItem('address', userData.address);
+                    profileAddress.textContent = userData.address;
+                }
+                if (userData.username) {
+                    localStorage.setItem('username', userData.username);
+                    profileName.textContent = userData.username;
+                    profileAvatar.textContent = userData.username.charAt(0);
+                }
+                if (profileTotalOrders) {
+                    profileTotalOrders.textContent = userData.totalOrders || 0;
+                }
+            }
+        } catch (err) {
+            console.log('Error fetching DB user metrics:', err);
+        }
     } else {
         profileAvatar.textContent = '';
         profileAvatar.style.display = 'none';
         profileName.textContent = 'Guest';
         profileLoginId.textContent = 'Please login';
         profileAddress.textContent = 'Not added';
+        if (profileTotalOrders) profileTotalOrders.textContent = '0';
         profileLoginLink.style.display = 'block';
         logoutBtn.style.display = 'none';
     }
@@ -436,7 +583,7 @@ function addToCart(name, price) {
     fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, name, price: Number(price) })
+        body: JSON.stringify({ userId, name, price: Number(price), weight: '100g' })
     })
     .then(res => res.json())
     .then(() => {
@@ -447,27 +594,252 @@ function addToCart(name, price) {
 }
 
 
+
+const productDescriptions = {
+    mango: 'Classic Andhra mango pickle with bright tang, warm spice, and a rich homemade oil blend.',
+    lemon: 'Zesty lemon pickle made for curd rice, dal rice, dosa, and everyday comfort meals.',
+    garlic: 'Bold garlic pickle with deep spice and a punchy traditional flavor.',
+    tomato: 'Tangy tomato pickle with garlic notes and a smooth, spicy finish.',
+    chilli: 'Fiery chilli pickle for spice lovers who want a strong kick with meals.',
+    ginger: 'Warm ginger pickle with a sharp, aromatic taste that pairs beautifully with breakfast.',
+    mixed: 'A family-style mixed veg pickle with multiple flavors in every spoon.',
+    chicken: 'Spicy chicken pickle packed with non-veg flavor and Andhra-style masala.',
+    mutton: 'Rich mutton pickle with bold spice, slow-cooked flavor, and hearty texture.',
+    prawn: 'Coastal-style prawn pickle with savory spice and a seafood punch.',
+    fish: 'Traditional fish pickle with a tangy, spicy masala base.',
+    crab: 'Crab pickle with deep coastal flavor and a strong pickle masala profile.',
+    nethallu: 'Small fish pickle with intense seafood flavor and Andhra spice.',
+    korameenu: 'Korameenu fish pickle with a rich, meaty bite and bold masala.',
+    tuna: 'Tuna pickle with a firm texture and spicy coastal taste.',
+    kavallu: 'Kavallu fish pickle made for fans of traditional seafood pickles.',
+    kanagadathalu: 'Kanagadathalu pickle with robust fish flavor and warming spice.',
+    vanjaram: 'Vanjaram fish pickle with premium fish taste and a rich masala coating.',
+    teepiavakaya: 'Sweet-spicy avakaya style pickle with a balanced traditional flavor.',
+    sorakaya: 'Sorakaya pickle with a homely vegetable taste and gentle spice.',
+    pandumirchi: 'Pandu mirchi pickle with ripe chilli heat and tangy depth.',
+    oosirikaya: 'Amla pickle with sour, earthy notes and classic pickle spice.',
+    dabbakaya: 'Dabbakaya pickle with citrusy sharpness and Andhra-style masala.',
+    cauliflower: 'Cauliflower pickle with crunchy bites and a bright spicy finish.'
+};
+
+const productBasePrices = {
+    Mango: 90,
+    Lemon: 70,
+    Garlic: 85,
+    Tomato: 65,
+    Chilli: 75,
+    Ginger: 80,
+    'Mixed Veg': 95,
+    Teepiavakaya: 90,
+    Sorakaya: 75,
+    Pandumirchi: 90,
+    Oosirikaya: 80,
+    Dabbakaya: 85,
+    Cauliflower: 80
+};
+
+function getBasePrice(name, fallbackPrice) {
+    return Number(productBasePrices[name] || fallbackPrice || 90);
+}
+
+function updateProductCardPrices() {
+    document.querySelectorAll('.card').forEach(card => {
+        const name = card.querySelector('h3')?.textContent.trim();
+        const priceEl = card.querySelector('p');
+        if (!name || !priceEl) return;
+        priceEl.textContent = `Rs. ${getBasePrice(name, 0).toFixed(2)} / 100g`;
+    });
+}
+
+let selectedProductForModal = null;
+
+function getProductDetailsFromCard(card) {
+    const name = card.querySelector('h3')?.textContent.trim() || 'Pickle';
+    const priceText = card.querySelector('p')?.textContent || '';
+    const parsedPrice = Number(priceText.replace(/[^\d.]/g, '')) || 0;
+    const price = getBasePrice(name, parsedPrice);
+    const image = card.querySelector('img')?.getAttribute('src') || '';
+    const lowerName = name.toLowerCase();
+    const detailKey = Object.keys(productDescriptions).find(key => lowerName.includes(key));
+
+    return {
+        name,
+        price,
+        image,
+        description: detailKey ? productDescriptions[detailKey] : 'Fresh Pickles Mart flavor made for everyday meals.'
+    };
+}
+
+function openProductDetails(product) {
+    const params = new URLSearchParams({
+        name: product.name,
+        price: `Rs. ${product.price}`,
+        image: product.image,
+        description: product.description
+    });
+    window.location.href = `product-detail.html?${params.toString()}`;
+}
+
+function closeProductDetails() {
+    document.getElementById('productModal').classList.remove('show');
+    document.getElementById('productModal').setAttribute('aria-hidden', 'true');
+}
+
+function initProductCards() {
+    document.querySelectorAll('.card').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('click', function() {
+            openProductDetails(getProductDetailsFromCard(card));
+        });
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                openProductDetails(getProductDetailsFromCard(card));
+            }
+        });
+    });
+
+    document.querySelectorAll('.card button').forEach(button => {
+        button.textContent = 'Add to Cart';
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    document.getElementById('productModalClose').addEventListener('click', closeProductDetails);
+    document.getElementById('productModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProductDetails();
+    });
+    document.getElementById('productModalAdd').addEventListener('click', function() {
+        if (!selectedProductForModal) return;
+        addToCart(selectedProductForModal.name, selectedProductForModal.price);
+    });
+}
+
 // -------- BUTTON CONNECT --------
 
 document.querySelectorAll('.card button').forEach(button => {
     button.addEventListener('click', function () {
         const card = button.closest('.card');
-        const name = card.querySelector('h3').textContent;
-        const price = card.querySelector('p').textContent.replace(/[₹,\s]/g, '');
-        addToCart(name, price);
+        const name = card.querySelector('h3').textContent.trim();
+        const priceText = card.querySelector('p').textContent.trim();
+        const image = card.querySelector('img').src;
+        
+        const descriptions = {
+            'Mango': 'Fresh and tangy mango pickle with authentic spices',
+            'Lemon': 'Sour and spicy lemon pickle - perfect with rice',
+            'Garlic': 'Bold flavored garlic pickle for pickle lovers',
+            'Tomato': 'Sweet and sour tomato pickle with ginger',
+            'Chilli': 'Extra spicy green chilli pickle',
+            'Ginger': 'Warm and aromatic ginger pickle',
+            'Mixed Veg': 'Assorted vegetables in tangy pickle',
+            'Teepiavakaya': 'Traditional Andhra style ridge gourd pickle',
+            'Sorakaya': 'Bottle gourd in spicy pickle masala',
+            'Pandumirchi': 'Green chilli and long pepper pickle',
+            'Oosirikaya': 'Okra pickle with traditional spices',
+            'Dabbakaya': 'Pumpkin pickle with unique flavor profile',
+            'Cauliflower': 'Crispy cauliflower in tangy masala'
+        };
+
+        const description = descriptions[name] || 'Premium quality pickle product';
+
+        const params = new URLSearchParams({
+            name: name,
+            price: priceText,
+            image: image,
+            description: description
+        });
+
+        window.location.href = `product-detail.html?${params.toString()}`;
     });
 });
 
+
+// -------- NAVIGATE TO PRODUCT --------
+
+function goToProduct(name, price, image) {
+    const descriptions = {
+        'Mango': 'Fresh and tangy mango pickle with authentic spices',
+        'Lemon': 'Sour and spicy lemon pickle - perfect with rice',
+        'Garlic': 'Bold flavored garlic pickle for pickle lovers',
+        'Tomato': 'Sweet and sour tomato pickle with ginger',
+        'Chilli': 'Extra spicy green chilli pickle',
+        'Ginger': 'Warm and aromatic ginger pickle',
+        'Mixed Veg': 'Assorted vegetables in tangy pickle',
+        'Teepiavakaya': 'Traditional Andhra style ridge gourd pickle',
+        'Sorakaya': 'Bottle gourd in spicy pickle masala',
+        'Pandumirchi': 'Green chilli and long pepper pickle',
+        'Oosirikaya': 'Okra pickle with traditional spices',
+        'Dabbakaya': 'Pumpkin pickle with unique flavor profile',
+        'Cauliflower': 'Crispy cauliflower in tangy masala'
+    };
+    
+    const description = descriptions[name] || 'Premium quality pickle product';
+    const basePrice = getBasePrice(name, Number(String(price).replace(/[^\d.]/g, '')) || 0);
+    
+    const params = new URLSearchParams({
+        name: name,
+        price: `Rs. ${basePrice}`,
+        image: image,
+        description: description
+    });
+    
+    window.location.href = `product-detail.html?${params.toString()}`;
+}
+
+function buyNowFromCard(product) {
+    if (window.PickleMartCheckout) {
+        window.PickleMartCheckout.startBuyNow(product);
+    }
+}
+
+function installCardPurchaseActions() {
+    document.querySelectorAll('.card').forEach(card => {
+        const oldButton = card.querySelector('button');
+        if (!oldButton) return;
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.textContent = 'Add to cart';
+
+        const buyButton = document.createElement('button');
+        buyButton.type = 'button';
+        buyButton.className = 'buy-now-btn';
+        buyButton.textContent = 'Buy now';
+
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const product = getProductDetailsFromCard(card);
+            addToCart(product.name, product.price);
+        });
+
+        buyButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            buyNowFromCard(getProductDetailsFromCard(card));
+        });
+
+        actions.append(addButton, buyButton);
+        oldButton.replaceWith(actions);
+    });
+}
 
 // -------- INIT --------
 
 document.addEventListener('DOMContentLoaded', function() {
     initSearchFromQueryParam();
+    updateProductCardPrices();
     updateLoginDisplay();
     updateProfileMenu();
     initProfileMenu();
     updateCartCount();
+    initProductCards();
+    installCardPurchaseActions();
 });
 </script>
+<script src="checkout.js"></script>
 </body>
 </html>
