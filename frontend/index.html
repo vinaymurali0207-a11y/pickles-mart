@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pickles Mart</title>
+<link rel="stylesheet" href="checkout.css">
+
+<style>
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f8f1ea;
+    color: #241f20;
+    scroll-behavior: smooth;
+}
+
+/* Navigation */
+nav {
+    background: #222;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.nav-links a:hover { color: yellow; }
+
+.nav-left {
+    position: relative;
+}
+
+.hamburger-btn {
+    width: 38px;
+    height: 38px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin: 0;
+    border-radius: 6px;
+}
+
+.hamburger-btn img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-menu {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    color: #222;
+    box-shadow: 8px 0 24px rgba(0,0,0,0.22);
+    padding: 16px;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    z-index: 2000;
+}
+
+.profile-menu.show {
+    transform: translateX(0);
+}
+
+.drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1500;
+}
+
+.drawer-overlay.show {
+    display: block;
+}
+
+.menu-links {
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+}
+
+.menu-links a {
+    display: block;
+    color: #222;
+    text-decoration: none;
+    padding: 12px 6px;
+    border-radius: 6px;
+}
+
+.menu-links a:hover {
+    background: #f2f2f2;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.profile-avatar {
+    display: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: green;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.profile-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.profile-label {
+    font-size: 12px;
+    color: #777;
+}
+
+.profile-detail {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.profile-form {
+    display: none;
+    margin-top: 14px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.profile-form label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #444;
+}
+
+.profile-form input,
+.profile-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: Arial;
+}
+
+.profile-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.profile-message {
+    display: none;
+    margin-top: 8px;
+    font-size: 13px;
+    color: red;
+}
+
+.profile-menu a,
+.profile-menu button {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    margin-top: 12px;
+    padding: 9px;
+    border-radius: 6px;
+    border: none;
+    background: green;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.profile-menu button {
+    cursor: pointer;
+}
+
+.profile-menu a:hover,
+.profile-menu button:hover {
+    background: darkgreen;
+}
+
+.profile-menu .menu-links a {
+    background: transparent;
+    color: #222;
+    text-align: left;
+    margin-top: 0;
+    padding: 12px 6px;
+}
+
+.profile-menu .menu-links a:hover {
+    background: #f2f2f2;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.signin-icon {
+    text-decoration: none;
+    margin-right: 20px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+    color: white;
+}
+
+.signin-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgb(250, 250, 249);
+}
+
+.signin-icon:hover svg {
+    stroke: rgb(250, 250, 249);
+}
+
+.signin-icon svg {
+    vertical-align: middle;
+    margin-right: 5px;
+    stroke: white;
+}
+
+.search-icon {
+    text-decoration: none;
+    margin-right: 20px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.search-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.search-icon:hover svg {
+    stroke: rgb(250, 250, 249);
+}
+
+.search-icon svg,
+.cart svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    stroke: white;
+}
+
+.cart {
+    text-decoration: none;
+    margin-left: 5px;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.cart:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.cart:hover svg {
+    stroke: rgb(246, 246, 241);
+}
+
+/* Sections */
+section {
+    padding: 64px 30px;
+}
+
+.section-title,
+h2 {
+    text-align: center;
+    margin: 0 0 42px;
+    font-size: clamp(34px, 4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: -1px;
+}
+
+.section-title span {
+    color: #ed1c24;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title span::after {
+    content: "";
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: -10px;
+    height: 7px;
+    border-bottom: 6px solid #ed1c24;
+    border-radius: 50%;
+}
+
+/* Hero */
+.hero {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1.05fr);
+    gap: 48px;
+    align-items: center;
+    min-height: 560px;
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 42px 0 20px;
+}
+
+.hero img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 28px;
+    background: #fff;
+    box-shadow: 0 22px 50px rgba(94, 61, 31, 0.16);
+}
+
+.eyebrow {
+    color: #ed1c24;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.hero h1 {
+    font-size: clamp(44px, 6vw, 76px);
+    line-height: 0.98;
+    margin: 0 0 22px;
+    letter-spacing: -2px;
+}
+
+.hero h1 span {
+    color: #ed1c24;
+}
+
+.hero p {
+    color: #5c514b;
+    font-size: 20px;
+    line-height: 1.7;
+    max-width: 570px;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
+}
+
+.primary-link,
+.secondary-link {
+    display: inline-block;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.primary-link {
+    background: #ed1c24;
+    color: white;
+    box-shadow: 0 12px 24px rgba(237, 28, 36, 0.24);
+}
+
+.secondary-link {
+    border: 2px solid #241f20;
+    color: #241f20;
+}
+
+/* Product grid */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 28px;
+    max-width: 1260px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    padding: 24px;
+    text-align: center;
+    border-radius: 0;
+    box-shadow: none;
+    transition: 0.3s ease;
+}
+
+.card:hover { transform: translateY(-6px); }
+
+.card img {
+    width: 100%;
+    height: 300px;
+    border-radius: 0;
+    object-fit: contain;
+}
+
+.card h3 {
+    font-size: 25px;
+    margin: 20px 0 10px;
+}
+
+.card .stars {
+    color: #d77c36;
+    font-size: 22px;
+    letter-spacing: 2px;
+}
+
+.card p {
+    color: #111;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.card button {
+    background: #ed1c24;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.card button:hover {
+    background: #b9141b;
+}
+
+.collections-grid,
+.benefits-grid,
+.promise-grid {
+    display: grid;
+    max-width: 1260px;
+    margin: 0 auto;
+    gap: 28px;
+}
+
+.collections-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.collection-card {
+    text-align: center;
+    text-decoration: none;
+    color: #241f20;
+}
+
+.collection-card img {
+    width: 100%;
+    height: 310px;
+    object-fit: cover;
+    background: #fff;
+}
+
+.collection-card h3 {
+    font-size: 26px;
+    margin: 24px 0 8px;
+}
+
+.collection-card p {
+    color: #5c514b;
+    font-size: 20px;
+    margin: 0;
+}
+
+.benefits-grid {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.benefit-card,
+.promise-card {
+    min-height: 210px;
+    border: 2px dashed #dfd2c7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 34px 24px;
+}
+
+.benefit-icon,
+.promise-icon {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    margin-bottom: 24px;
+}
+
+.benefit-card h3,
+.promise-card h3 {
+    font-size: 25px;
+    margin: 0 0 16px;
+}
+
+.benefit-card p {
+    color: #5c514b;
+    font-size: 20px;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.promise-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 680px;
+    padding: 0;
+    background: #fff9df;
+}
+
+.promise-image {
+    background: #f7ead6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.promise-image img {
+    width: 100%;
+    height: auto;
+    max-height: 680px;
+    object-fit: contain;
+}
+
+.promise-copy {
+    padding: 90px 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.promise-copy .section-title {
+    text-align: left;
+    margin-bottom: 28px;
+}
+
+.promise-copy p {
+    color: #4b413c;
+    font-size: 20px;
+    line-height: 1.7;
+}
+
+.promise-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    margin-top: 34px;
+}
+
+.promise-card {
+    min-height: 120px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.story-banner {
+    max-width: 1380px;
+    margin: 0 auto;
+    position: relative;
+    border-top: 12px solid #c4982e;
+    border-bottom: 12px solid #c4982e;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.story-banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+.story-banner h2 {
+    display: none;
+}
+
+.story-banner p {
+    display: none;
+}
+
+.story-visual {
+    display: none;
+}
+
+.story-visual img {
+    display: none;
+}
+
+.story-buy-btn {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ed1c24;
+    color: white;
+    padding: 12px 28px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 16px;
+    box-shadow: 0 8px 16px rgba(237, 28, 36, 0.4);
+    transition: all 0.3s ease;
+    z-index: 10;
+    border: none;
+    cursor: pointer;
+}
+
+.story-buy-btn:hover {
+    background: #b9141b;
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 12px 24px rgba(237, 28, 36, 0.5);
+}
+
+.testimonial-section {
+    background: linear-gradient(90deg, #fff7f7, #ffe9ea, #fff7f7);
+    min-height: 660px;
+}
+
+.testimonial-carousel {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.testimonials-track {
+    display: flex;
+    overflow: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.testimonial-card {
+    flex: 0 0 100%;
+    min-height: 450px;
+    padding: 24px 120px 10px;
+    text-align: center;
+    scroll-snap-align: center;
+}
+
+.testimonial-card .stars {
+    color: #d77c36;
+    font-size: 28px;
+}
+
+.testimonial-card h3 {
+    font-size: 28px;
+}
+
+.testimonial-card p {
+    color: #4b413c;
+    font-size: 24px;
+    line-height: 1.7;
+    max-width: 920px;
+    margin: 24px auto;
+}
+
+.testimonial-empty {
+    color: #4b413c;
+    font-size: 22px;
+    margin: 80px auto;
+    text-align: center;
+}
+
+.avatar {
+    width: 96px;
+    height: 96px;
+    margin: 22px auto;
+    border-radius: 50%;
+    background: #2f9a84;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 58px;
+}
+
+.reviewer-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    background: #eaf8ef;
+    color: #16833a;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 5px 9px;
+}
+
+.testimonial-product {
+    display: grid;
+    grid-template-columns: 86px 1fr auto;
+    gap: 22px;
+    align-items: center;
+    max-width: 520px;
+    margin: 34px auto 0;
+    background: white;
+    padding: 22px 26px;
+    text-align: left;
+    box-shadow: 0 18px 42px rgba(93, 52, 36, 0.08);
+}
+
+.testimonial-product img {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+}
+
+.testimonial-product h3 {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.testimonial-product p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.testimonial-buy-btn {
+    background: #ed1c24;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight: 800;
+    margin-top: 0;
+}
+
+.testimonial-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: white;
+    color: #241f20;
+    box-shadow: 0 12px 28px rgba(93, 52, 36, 0.16);
+    font-size: 34px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+}
+
+.testimonial-arrow:hover {
+    background: #ed1c24;
+    color: white;
+}
+
+.testimonial-arrow.prev {
+    left: 30px;
+}
+
+.testimonial-arrow.next {
+    right: 30px;
+}
+
+.whatsapp-float {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1400;
+    background: #48c543;
+    color: white;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 16px 24px;
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+}
+
+@media (max-width: 920px) {
+    nav {
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .nav-links {
+        order: 3;
+        flex-basis: 100%;
+        overflow-x: auto;
+    }
+
+    .hero,
+    .promise-section,
+    .story-banner {
+        grid-template-columns: 1fr;
+    }
+
+    .collections-grid,
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .promise-copy {
+        padding: 56px 26px;
+    }
+}
+
+@media (max-width: 560px) {
+    section {
+        padding: 48px 16px;
+    }
+
+    .collections-grid,
+    .benefits-grid,
+    .promise-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonial-card {
+        padding: 20px 58px 8px;
+    }
+
+    .testimonial-card p {
+        font-size: 19px;
+    }
+
+    .testimonial-product {
+        grid-template-columns: 64px 1fr;
+    }
+
+    .testimonial-buy-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .collection-card img {
+        height: 240px;
+    }
+
+    .card img {
+        height: 230px;
+    }
+
+    .story-banner {
+        padding: 0;
+    }
+
+    .story-buy-btn {
+        bottom: 30px;
+        padding: 10px 24px;
+        font-size: 14px;
+    }
+
+    .whatsapp-float {
+        right: 14px;
+        bottom: 14px;
+        font-size: 16px;
+        padding: 13px 18px;
+    }
+}
+
+button {
+    background: green;
+    color: white;
+    border: none;
+    padding: 8px;
+    margin-top: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover { background: darkgreen; }
+
+/* Contact */
+.contact {
+    text-align: center;
+    font-size: 18px;
+}
+
+.search-box {
+    display: none;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.search-box input {
+    padding: 5px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.search-box button {
+    padding: 5px 10px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.search-box button:hover {
+    background: darkgreen;
+}
+
+
+.card {
+    cursor: pointer;
+}
+
+.product-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.product-modal-overlay.show {
+    display: flex;
+}
+
+.product-modal {
+    width: min(760px, 96vw);
+    background: #fffaf2;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    padding: 28px;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1fr);
+    gap: 28px;
+    align-items: center;
+}
+
+.product-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    font-size: 22px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.product-modal img {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    background: white;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.product-modal h2 {
+    text-align: left;
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+.product-modal-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f7a3c;
+    margin: 0 0 14px;
+}
+
+.product-modal-description {
+    color: #4b413c;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.product-modal-add {
+    margin-top: 16px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.card-actions button {
+    width: 100%;
+    margin-top: 0;
+}
+
+.card-actions .buy-now-btn {
+    background: #111;
+}
+
+.card-actions .buy-now-btn:hover {
+    background: #ed1c24;
+}
+
+@media (max-width: 620px) {
+    .product-modal {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+    <div class="nav-left">
+        <button class="hamburger-btn" id="profileToggle" type="button" title="Profile">
+            <img src="17583748.svg" alt="Menu">
+        </button>
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        <div class="profile-menu" id="profileMenu">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <div>
+                    <div class="profile-name" id="profileName">Guest</div>
+                    <div class="profile-label" id="profileLoginId">Please login</div>
+                </div>
+            </div>
+            <div class="profile-detail">
+                <strong>Address:</strong>
+                <div id="profileAddress">Not added</div>
+                <div style="margin-top:6px;"><strong>Total Orders in DB:</strong> <span id="profileTotalOrders" style="background:green;color:white;padding:2px 6px;border-radius:10px;font-size:12px;">0</span></div>
+            </div>
+            <div class="profile-form" id="profileForm">
+                <label for="profileUsernameInput">Username</label>
+                <input type="text" id="profileUsernameInput" placeholder="Enter username">
+                <label for="profileAddressInput">Address</label>
+                <textarea id="profileAddressInput" placeholder="Enter delivery address"></textarea>
+                <button type="button" id="profileSaveBtn">Save Profile</button>
+                <div class="profile-message" id="profileMessage"></div>
+            </div>
+            <div class="menu-links">
+                <a href="pickle.html">Home</a>
+                <a href="profile.html" id="profileLink">Profile Account</a>
+                <a href="veg.html">Veg</a>
+                <a href="nonveg.html">Non-Veg</a>
+                <a href="cart.html">Cart</a>
+                <a href="pickle.html#contact">Others</a>
+            </div>
+            <a href="login.html" id="profileLoginLink">Login / Create Account</a>
+            <button type="button" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+    <div class="nav-links">
+        <a href="pickle.html">Home</a>
+        <a href="veg.html">Veg</a>
+        <a href="nonveg.html">Non-Veg</a>
+        <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-right">        <a href="login.html" class="signin-icon" title="Sign In">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/>
+                <line x1="10" y1="12" x2="18" y2="12"/>
+                <polyline points="15 9 18 12 15 15"/>
+            </svg>
+             <span id="loginText">Login</span>
+        </a>        <a href="#" class="search-icon" title="Search">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </a>
+        <a href="cart.html" class="cart" id="cartLink" title="View Cart">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+        </a>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+</nav>
+
+<div class="search-box">
+    <input type="text" placeholder="Search products...">
+    <button>Search</button>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/919948607206" target="_blank" rel="noopener">Message Us</a>
+
+<!-- HOME -->
+<section id="home">
+    <div class="hero">
+        <div>
+            <div class="eyebrow">Fresh Telugu-style pickles</div>
+            <h1>Bringing home the <span>joy</span> of bold pickle taste.</h1>
+            <p>Pickles Mart celebrates homemade flavor with spicy, tangy, and slow-made recipes packed for everyday meals.</p>
+            <div class="hero-actions">
+                <a class="primary-link" href="veg.html">Shop Veg Pickles</a>
+                <a class="secondary-link" href="nonveg.html">Shop Non-Veg Pickles</a>
+            </div>
+        </div>
+        <div>
+            <img src="logo.png" alt="Pickles Mart logo">
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title">Explore our <span>Collections</span></h2>
+    <div class="collections-grid">
+        <a class="collection-card" href="veg.html">
+            <img src="mango2.webp" alt="Veg pickle collection">
+            <h3>Veg Pickles</h3>
+            <p>13 items</p>
+        </a>
+        <a class="collection-card" href="nonveg.html">
+            <img src="chicken.png" alt="Non-veg pickle collection">
+            <h3>Non-Veg Pickles</h3>
+            <p>11 items</p>
+        </a>
+        <a class="collection-card" href="veg.html?search=mixed%20veg">
+            <img src="mixed veg.webp" alt="Mixed pickle collection">
+            <h3>Family Specials</h3>
+            <p>6 items</p>
+        </a>
+        <a class="collection-card" href="nonveg.html?search=fish">
+            <img src="fish.png" alt="Fish pickle collection">
+            <h3>Fish Pickles</h3>
+            <p>7 items</p>
+        </a>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title">The <span>Benefits</span> We Provide</h2>
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <img class="benefit-icon" src="quick-mode.png" alt="Quick delivery icon">
+            <h3>Quick Delivery</h3>
+            <p>Fresh flavors, packed and sent on time.</p>
+        </div>
+        <div class="benefit-card">
+            <img class="benefit-icon" src="taste.png" alt="Authentic taste icon">
+            <h3>Authentic Taste</h3>
+            <p>Traditional recipes, true to Telugu homes.</p>
+        </div>
+        <div class="benefit-card">
+            <img class="benefit-icon" src="wide-range.png" alt="Wide range icon">
+            <h3>Wide Range</h3>
+            <p>Veg, non-veg, fish, and seasonal pickles.</p>
+        </div>
+        <div class="benefit-card">
+            <img class="benefit-icon" src="trusted-brand.png" alt="Trusted kitchen icon">
+            <h3>Trusted Kitchen</h3>
+            <p>Made with care, spice balance, and hygiene.</p>
+        </div>
+        <div class="benefit-card">
+            <img class="benefit-icon" src="better-health.png" alt="Quality-made icon">
+            <h3>Quality-Made</h3>
+            <p>Clean ingredients and consistent flavor.</p>
+        </div>
+    </div>
+</section>
+
+<section class="promise-section">
+    <div class="promise-image">
+        <img src="ChatGPT Image May 7, 2026, 04_46_26 PM.png" alt="Pickles Mart traditional pickle promise">
+    </div>
+    <div class="promise-copy">
+        <div class="eyebrow">Made with real ingredients</div>
+        <h2 class="section-title">The <span>Pickles Mart</span> Promise</h2>
+        <p>We bring the timeless charm of homemade pickle jars to your table with recipes inspired by Andhra kitchens.</p>
+        <p>Every batch focuses on flavor, freshness, and spice that feels familiar with curd rice, dosa, chapati, and family meals.</p>
+        <div class="promise-grid">
+            <div class="promise-card">
+                <img class="promise-icon" src="Nostalgia.webp" alt="Nostalgia icon">
+                <h3>Nostalgia</h3>
+            </div>
+            <div class="promise-card">
+                <img class="promise-icon" src="Authentic.webp" alt="Trust icon">
+                <h3>Trust</h3>
+            </div>
+            <div class="promise-card">
+                <img class="promise-icon" src="Legacy.png" alt="Legacy icon">
+                <h3>Legacy</h3>
+            </div>
+            <div class="promise-card">
+                <img class="promise-icon" src="great-value.webp" alt="Great value icon">
+                <h3>Great Value</h3>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title">Shop our <span>Best Sellers</span></h2>
+    <div class="products">
+        <div class="card" onclick="goToProduct('Tomato Pickle', '₹65', 'tomato.webp')"><img src="tomato.webp" alt="Tomato Pickle"><h3>Tomato Pickle</h3><div class="stars">*****</div><p>Rs. 65/100g</p><button>View Details</button></div>
+        <div class="card" onclick="goToProduct('Mango Pickle', '₹90', 'mango2.webp')"><img src="mango2.webp" alt="Mango Pickle"><h3>Mango Pickle</h3><div class="stars">*****</div><p>Rs. 90/100g</p><button>View Details</button></div>
+        <div class="card" onclick="goToProduct('Ginger Pickle', '₹80', 'ginger.webp')"><img src="ginger.webp" alt="Ginger Pickle"><h3>Ginger Pickle</h3><div class="stars">*****</div><p>Rs. 80/100g</p><button>View Details</button></div>
+        <div class="card" onclick="goToProduct('Chilli Pickle', '₹75', 'chilli.webp')"><img src="chilli.webp" alt="Chilli Pickle"><h3>Chilli Pickle</h3><div class="stars">*****</div><p>Rs. 75/100g</p><button>View Details</button></div>
+    </div>
+</section>
+
+<section>
+    <div class="story-banner">
+        <img src="roti_story_4k.png" alt="The Roti Pachadi Story - Traditional pickle making" class="story-banner-img">
+        <a href="veg.html" class="story-buy-btn">Buy Now</a>
+    </div>
+</section>
+
+<section class="testimonial-section">
+    <div class="testimonial-carousel">
+        <button class="testimonial-arrow prev" id="testimonialPrev" type="button" aria-label="Previous review">&#8249;</button>
+        <div class="testimonials-track" id="testimonialsTrack" aria-label="Customer pickle reviews">
+            <div class="testimonial-empty">Loading reviews...</div>
+        </div>
+        <button class="testimonial-arrow next" id="testimonialNext" type="button" aria-label="Next review">&#8250;</button>
+    </div>
+</section>
+<!-- CONTACT -->
+<section id="contact">
+
+<h2>Contact Us</h2>
+
+<div class="contact">
+<p>PicklesMart@gmail.com</p>
+<p>Phone: +91 9948607206,+91 9703397229</p>
+<p>Location: Kakinada, Andhra Pradesh</p>
+</div>
+
+</section>
+
+
+<div class="product-modal-overlay" id="productModal" aria-hidden="true">
+    <div class="product-modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+        <button class="product-modal-close" id="productModalClose" type="button" aria-label="Close product details">&times;</button>
+        <img id="productModalImage" src="" alt="">
+        <div>
+            <h2 id="productModalTitle"></h2>
+            <p class="product-modal-price" id="productModalPrice"></p>
+            <p class="product-modal-description" id="productModalDescription"></p>
+            <button class="product-modal-add" id="productModalAdd" type="button">Add to Cart</button>
+        </div>
+    </div>
+</div>
+<script>
+    console.log("SCRIPT LOADED");
+const routeMap = {
+    mango: 'pickle.html', lemon: 'pickle.html', garlic: 'pickle.html', tomato: 'pickle.html', chilli: 'pickle.html', ginger: 'pickle.html', 'mixed veg': 'pickle.html', chicken: 'nonveg.html', mutton: 'nonveg.html', prawn: 'nonveg.html', fish: 'nonveg.html', crab: 'nonveg.html', nethallu: 'nonveg.html', korameenu: 'nonveg.html', tuna: 'nonveg.html', kavallu: 'nonveg.html', kanagadathalu: 'nonveg.html', vanjaram: 'nonveg.html', teepiavakaya: 'veg.html', sorakaya: 'veg.html', pandumirchi: 'veg.html', oosirikaya: 'veg.html', dabbakaya: 'veg.html', cauliflower: 'veg.html'
+};
+
+function clearHighlight(cards) {
+    cards.forEach(c => {
+        c.style.outline = 'none';
+        c.style.background = '';
+    });
+}
+
+function searchProduct(query) {
+    const normalized = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('.card');
+
+    if (!normalized) {
+        clearHighlight(cards);
+        cards.forEach(card => card.style.display = 'block');
+        return true;
+    }
+
+    let foundCard = null;
+    cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        if (!foundCard && title.includes(normalized)) {
+            foundCard = card;
+        }
+    });
+
+    if (foundCard) {
+        cards.forEach(card => card.style.display = 'block');
+        clearHighlight(cards);
+        foundCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        foundCard.style.outline = '3px solid #ff9800';
+        foundCard.style.background = '#fff8e1';
+        return true;
+    }
+
+    return false;
+}
+
+function getPageForQuery(query) {
+    const normalized = query.toLowerCase().trim();
+    if (!normalized) return null;
+
+    for (const key in routeMap) {
+        if (key.includes(normalized) || normalized.includes(key)) {
+            return routeMap[key];
+        }
+    }
+
+    return null;
+}
+
+function runSearch() {
+    const input = document.querySelector('.search-box input');
+    const query = input.value.toLowerCase().trim();
+
+    if (searchProduct(query)) {
+        return;
+    }
+
+    const currentPage = window.location.pathname.split('/').pop();
+    const redirectPage = getPageForQuery(query);
+
+    if (redirectPage && redirectPage !== currentPage) {
+        window.location.href = `${redirectPage}?search=${encodeURIComponent(query)}`;
+    } else {
+        alert('No pickle found with that name on this site.');
+        clearHighlight(document.querySelectorAll('.card'));
+    }
+}
+
+function initSearchFromQueryParam() {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('search');
+    if (query) {
+        document.querySelector('.search-box input').value = query;
+        if (!searchProduct(query)) {
+            alert('No pickle found with that name on this page.');
+        }
+    }
+}
+
+document.querySelector('.search-icon').addEventListener('click', function(e) {
+    e.preventDefault();
+    var box = document.querySelector('.search-box');
+    box.style.display = box.style.display === 'none' || box.style.display === '' ? 'block' : 'none';
+});
+
+document.querySelector('.search-box button').addEventListener('click', function() {
+    runSearch();
+});
+
+document.querySelector('.search-box input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        runSearch();
+    }
+});
+
+function updateCartCount() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    fetch(`http://localhost:5000/api/cart/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+        const count = (data.items || []).reduce((t, i) => t + i.qty, 0);
+        document.getElementById('cartCount').textContent = count;
+    });
+}
+
+function updateLoginDisplay() {
+    const userId = localStorage.getItem('userId');
+    const loginLink = document.querySelector('.signin-icon');
+
+    if (loginLink) {
+        loginLink.style.display = userId ? 'none' : 'inline-block';
+    }
+}
+
+async function updateProfileMenu() {
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const address = localStorage.getItem('address');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileLoginId = document.getElementById('profileLoginId');
+    const profileAddress = document.getElementById('profileAddress');
+    const profileTotalOrders = document.getElementById('profileTotalOrders');
+    const profileLoginLink = document.getElementById('profileLoginLink');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (userId) {
+        const displayName = username && username !== 'undefined' ? username : 'User';
+        profileName.textContent = displayName;
+        profileAvatar.textContent = displayName.charAt(0);
+        profileAvatar.style.display = 'flex';
+        profileLoginId.textContent = userId;
+        profileAddress.textContent = address && address !== 'undefined' ? address : 'Not added';
+        profileLoginLink.style.display = 'none';
+        logoutBtn.style.display = 'block';
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+            if (res.ok) {
+                const userData = await res.json();
+                if (userData.address) {
+                    localStorage.setItem('address', userData.address);
+                    profileAddress.textContent = userData.address;
+                }
+                if (userData.username) {
+                    localStorage.setItem('username', userData.username);
+                    profileName.textContent = userData.username;
+                    profileAvatar.textContent = userData.username.charAt(0);
+                }
+                if (profileTotalOrders) {
+                    profileTotalOrders.textContent = userData.totalOrders || 0;
+                }
+            }
+        } catch (err) {
+            console.log('Error fetching DB user metrics:', err);
+        }
+    } else {
+        profileAvatar.textContent = '';
+        profileAvatar.style.display = 'none';
+        profileName.textContent = 'Guest';
+        profileLoginId.textContent = 'Please login';
+        profileAddress.textContent = 'Not added';
+        if (profileTotalOrders) profileTotalOrders.textContent = '0';
+        profileLoginLink.style.display = 'block';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+function initProfileMenu() {
+    const profileToggle = document.getElementById('profileToggle');
+    const profileMenu = document.getElementById('profileMenu');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profileLink = document.getElementById('profileLink');
+    const profileForm = document.getElementById('profileForm');
+    const profileUsernameInput = document.getElementById('profileUsernameInput');
+    const profileAddressInput = document.getElementById('profileAddressInput');
+    const profileSaveBtn = document.getElementById('profileSaveBtn');
+    const profileMessage = document.getElementById('profileMessage');
+
+    function closeMenu() {
+        profileMenu.classList.remove('show');
+        drawerOverlay.classList.remove('show');
+    }
+
+    function showProfileForm() {
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+        const address = localStorage.getItem('address');
+
+        if (!userId) {
+            profileMessage.textContent = 'Please login first to fill profile details.';
+            profileMessage.style.display = 'block';
+            return;
+        }
+
+        profileUsernameInput.value = username && username !== 'undefined' ? username : '';
+        profileAddressInput.value = address && address !== 'undefined' ? address : '';
+        profileMessage.style.display = (!profileUsernameInput.value || !profileAddressInput.value) ? 'block' : 'none';
+        profileMessage.textContent = 'Please fill missing profile details.';
+        profileForm.style.display = 'block';
+        profileForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function saveProfile() {
+        const userId = localStorage.getItem('userId');
+        const username = profileUsernameInput.value.trim();
+        const address = profileAddressInput.value.trim();
+
+        if (!username || !address) {
+            profileMessage.textContent = 'Username and address are required.';
+            profileMessage.style.color = 'red';
+            profileMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, address })
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                profileMessage.textContent = data.message || data.error || 'Profile update failed.';
+                profileMessage.style.color = 'red';
+                profileMessage.style.display = 'block';
+                return;
+            }
+
+            localStorage.setItem('username', data.username);
+            localStorage.setItem('address', data.address);
+            updateProfileMenu();
+            profileMessage.textContent = 'Profile saved.';
+            profileMessage.style.color = 'green';
+            profileMessage.style.display = 'block';
+        } catch (err) {
+            profileMessage.textContent = 'Server error';
+            profileMessage.style.color = 'red';
+            profileMessage.style.display = 'block';
+        }
+    }
+
+    profileToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        profileMenu.classList.toggle('show');
+        drawerOverlay.classList.toggle('show');
+    });
+
+    profileMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    drawerOverlay.addEventListener('click', closeMenu);
+
+    profileLink.addEventListener('click', function(e) {
+        window.location.href = 'profile.html';
+    });
+
+    profileSaveBtn.addEventListener('click', saveProfile);
+
+    logoutBtn.addEventListener('click', function() {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        localStorage.removeItem('address');
+        updateLoginDisplay();
+        updateProfileMenu();
+        profileForm.style.display = 'none';
+        closeMenu();
+    });
+}
+
+function addToCart(name, price) {
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+        alert("Login first");
+        return;
+    }
+
+    fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, name, price: Number(price) })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert(name + " added to cart");
+    })
+    .catch(err => console.error(err));
+}
+
+const productCatalog = {
+    mango: { name: 'Mango Pickle', price: 199, image: 'mango2.webp' },
+    tomato: { name: 'Tomato Pickle', price: 129, image: 'tomato.webp' },
+    lemon: { name: 'Lemon Pickle', price: 149, image: 'lemon.webp' },
+    garlic: { name: 'Garlic Pickle', price: 179, image: 'Garlic.jpeg' },
+    ginger: { name: 'Ginger Pickle', price: 159, image: 'ginger.webp' },
+    chilli: { name: 'Chilli Pickle', price: 139, image: 'chilli.webp' },
+    chicken: { name: 'Chicken Pickle', price: 299, image: 'chicken.png' },
+    mutton: { name: 'Mutton Pickle', price: 399, image: 'mutton.png' },
+    prawn: { name: 'Prawn Pickle', price: 349, image: 'prawn.png' },
+    fish: { name: 'Fish Pickle', price: 279, image: 'fish.png' },
+    crab: { name: 'Crab Pickle', price: 429, image: 'crab.png' },
+    nethallu: { name: 'Nethallu Pickle', price: 289, image: 'Nethallu.png' },
+    korameenu: { name: 'Korameenu Pickle', price: 319, image: 'Korameenu.png' },
+    tuna: { name: 'Tuna Pickle', price: 349, image: 'tuna.png' },
+    kavallu: { name: 'Kavallu Pickle', price: 299, image: 'Kavallu.png' },
+    kanagadathalu: { name: 'Kanagadathalu Pickle', price: 329, image: 'Kanagadathalu.png' },
+    vanjaram: { name: 'Vanjaram Pickle', price: 379, image: 'Vanjaram.png' },
+    teepiavakaya: { name: 'Teepiavakaya Pickle', price: 169, image: 'Teepiavakaya.png' },
+    sorakaya: { name: 'Sorakaya Pickle', price: 189, image: 'Sorakaya.png' },
+    pandumirchi: { name: 'Pandumirchi Pickle', price: 179, image: 'Pandumirchi.png' },
+    oosirikaya: { name: 'Oosirikaya Pickle', price: 159, image: 'Oosirikaya.png' },
+    dabbakaya: { name: 'Dabbakaya Pickle', price: 189, image: 'Dabbakaya.png' },
+    cauliflower: { name: 'Cauliflower Pickle', price: 149, image: 'Cauliflower.png' },
+    mixed: { name: 'Mixed Veg Pickle', price: 199, image: 'mixed veg.webp' }
+};
+
+let testimonialIndex = 0;
+
+function getProductDetails(review) {
+    const rawName = String(review.productName || 'Pickle').toLowerCase();
+    const matchedKey = Object.keys(productCatalog).find(key => rawName.includes(key));
+    const matchedProduct = matchedKey ? productCatalog[matchedKey] : productCatalog.mango;
+
+    return {
+        name: review.productName || matchedProduct.name,
+        price: Number(String(review.price || matchedProduct.price).replace(/[^\d.]/g, '')) || matchedProduct.price,
+        image: review.image || matchedProduct.image
+    };
+}
+
+function createStars(rating) {
+    return '*'.repeat(Math.max(1, Math.min(Number(rating) || 5, 5)));
+}
+
+function moveTestimonials(direction) {
+    const track = document.getElementById('testimonialsTrack');
+    const slides = track ? track.querySelectorAll('.testimonial-card') : [];
+    if (!track || !slides.length) return;
+
+    testimonialIndex = (testimonialIndex + direction + slides.length) % slides.length;
+    track.scrollTo({
+        left: slides[testimonialIndex].offsetLeft,
+        behavior: 'smooth'
+    });
+}
+
+function renderTestimonials(reviews) {
+    const track = document.getElementById('testimonialsTrack');
+    const prevBtn = document.getElementById('testimonialPrev');
+    const nextBtn = document.getElementById('testimonialNext');
+    if (!track) return;
+
+    track.innerHTML = '';
+    testimonialIndex = 0;
+
+    if (!reviews.length) {
+        track.innerHTML = '<div class="testimonial-empty">No database reviews found yet.</div>';
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        return;
+    }
+
+    if (prevBtn) prevBtn.style.display = reviews.length > 1 ? 'block' : 'none';
+    if (nextBtn) nextBtn.style.display = reviews.length > 1 ? 'block' : 'none';
+
+    reviews.forEach(review => {
+        const product = getProductDetails(review);
+        const slide = document.createElement('div');
+        slide.className = 'testimonial-card';
+
+        const stars = document.createElement('div');
+        stars.className = 'stars';
+        stars.textContent = createStars(review.rating);
+
+        const heading = document.createElement('h3');
+        heading.textContent = 'Testimonials';
+
+        const reviewText = document.createElement('p');
+        reviewText.textContent = review.reviewText;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = String(review.customerName || 'C').trim().charAt(0).toUpperCase();
+
+        const reviewerLine = document.createElement('h3');
+        reviewerLine.className = 'reviewer-line';
+
+        const name = document.createElement('span');
+        name.textContent = review.customerName || 'Customer';
+        reviewerLine.appendChild(name);
+
+        if (review.verified === true) {
+            const badge = document.createElement('span');
+            badge.className = 'verified-badge';
+            badge.innerHTML = '<span aria-hidden="true">&#10003;</span> Verified';
+            badge.title = 'Verified database user';
+            reviewerLine.appendChild(badge);
+        }
+
+        const productBox = document.createElement('div');
+        productBox.className = 'testimonial-product';
+
+        const productImage = document.createElement('img');
+        productImage.src = product.image;
+        productImage.alt = product.name;
+
+        const productCopy = document.createElement('div');
+        const productName = document.createElement('h3');
+        productName.textContent = product.name;
+        const productPrice = document.createElement('p');
+        productPrice.textContent = `Rs. ${product.price}`;
+        productCopy.append(productName, productPrice);
+
+        const buyBtn = document.createElement('button');
+        buyBtn.type = 'button';
+        buyBtn.className = 'testimonial-buy-btn';
+        buyBtn.textContent = 'Buy';
+        buyBtn.addEventListener('click', () => {
+            if (window.PickleMartCheckout) {
+                window.PickleMartCheckout.startBuyNow(product);
+            }
+        });
+
+        productBox.append(productImage, productCopy, buyBtn);
+        slide.append(stars, heading, reviewText, avatar, reviewerLine, productBox);
+        track.appendChild(slide);
+    });
+}
+
+function loadTestimonials() {
+    fetch('http://localhost:5000/api/reviews?verified=true')
+    .then(res => res.json())
+    .then(data => {
+        const reviewsToRender = Array.isArray(data) ? data : [];
+        renderTestimonials(reviewsToRender);
+    })
+    .catch(() => {
+        const track = document.getElementById('testimonialsTrack');
+        if (track) {
+            track.innerHTML = '<div class="testimonial-empty">Unable to load database reviews right now.</div>';
+        }
+    });
+}
+
+document.getElementById('testimonialPrev').addEventListener('click', function() {
+    moveTestimonials(-1);
+});
+
+document.getElementById('testimonialNext').addEventListener('click', function() {
+    moveTestimonials(1);
+});
+
+
+const productDescriptions = {
+    mango: 'Classic Andhra mango pickle with bright tang, warm spice, and a rich homemade oil blend.',
+    lemon: 'Zesty lemon pickle made for curd rice, dal rice, dosa, and everyday comfort meals.',
+    garlic: 'Bold garlic pickle with deep spice and a punchy traditional flavor.',
+    tomato: 'Tangy tomato pickle with garlic notes and a smooth, spicy finish.',
+    chilli: 'Fiery chilli pickle for spice lovers who want a strong kick with meals.',
+    ginger: 'Warm ginger pickle with a sharp, aromatic taste that pairs beautifully with breakfast.',
+    mixed: 'A family-style mixed veg pickle with multiple flavors in every spoon.',
+    chicken: 'Spicy chicken pickle packed with non-veg flavor and Andhra-style masala.',
+    mutton: 'Rich mutton pickle with bold spice, slow-cooked flavor, and hearty texture.',
+    prawn: 'Coastal-style prawn pickle with savory spice and a seafood punch.',
+    fish: 'Traditional fish pickle with a tangy, spicy masala base.',
+    crab: 'Crab pickle with deep coastal flavor and a strong pickle masala profile.',
+    nethallu: 'Small fish pickle with intense seafood flavor and Andhra spice.',
+    korameenu: 'Korameenu fish pickle with a rich, meaty bite and bold masala.',
+    tuna: 'Tuna pickle with a firm texture and spicy coastal taste.',
+    kavallu: 'Kavallu fish pickle made for fans of traditional seafood pickles.',
+    kanagadathalu: 'Kanagadathalu pickle with robust fish flavor and warming spice.',
+    vanjaram: 'Vanjaram fish pickle with premium fish taste and a rich masala coating.',
+    teepiavakaya: 'Sweet-spicy avakaya style pickle with a balanced traditional flavor.',
+    sorakaya: 'Sorakaya pickle with a homely vegetable taste and gentle spice.',
+    pandumirchi: 'Pandu mirchi pickle with ripe chilli heat and tangy depth.',
+    oosirikaya: 'Amla pickle with sour, earthy notes and classic pickle spice.',
+    dabbakaya: 'Dabbakaya pickle with citrusy sharpness and Andhra-style masala.',
+    cauliflower: 'Cauliflower pickle with crunchy bites and a bright spicy finish.'
+};
+
+let selectedProductForModal = null;
+
+function getProductDetailsFromCard(card) {
+    const name = card.querySelector('h3')?.textContent.trim() || 'Pickle';
+    const priceText = card.querySelector('p')?.textContent || '';
+    const price = Number(priceText.replace(/[^\d.]/g, '')) || 0;
+    const image = card.querySelector('img')?.getAttribute('src') || '';
+    const lowerName = name.toLowerCase();
+    const detailKey = Object.keys(productDescriptions).find(key => lowerName.includes(key));
+
+    return {
+        name,
+        price,
+        image,
+        description: detailKey ? productDescriptions[detailKey] : 'Fresh Pickles Mart flavor made for everyday meals.'
+    };
+}
+
+function openProductDetails(product) {
+    const params = new URLSearchParams({
+        name: product.name,
+        price: `₹${product.price}`,
+        image: product.image,
+        description: product.description
+    });
+    window.location.href = `product-detail.html?${params.toString()}`;
+}
+
+function buyNowFromCard(product) {
+    if (window.PickleMartCheckout) {
+        window.PickleMartCheckout.startBuyNow(product);
+    }
+}
+
+function installCardPurchaseActions() {
+    document.querySelectorAll('.card').forEach(card => {
+        const oldButton = card.querySelector('button');
+        if (!oldButton) return;
+
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.textContent = 'Add to cart';
+
+        const buyButton = document.createElement('button');
+        buyButton.type = 'button';
+        buyButton.className = 'buy-now-btn';
+        buyButton.textContent = 'Buy now';
+
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const product = getProductDetailsFromCard(card);
+            addToCart(product.name, product.price);
+        });
+
+        buyButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            buyNowFromCard(getProductDetailsFromCard(card));
+        });
+
+        actions.append(addButton, buyButton);
+        oldButton.replaceWith(actions);
+    });
+}
+
+function closeProductDetails() {
+    document.getElementById('productModal').classList.remove('show');
+    document.getElementById('productModal').setAttribute('aria-hidden', 'true');
+}
+
+function initProductCards() {
+    document.querySelectorAll('.card').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('click', function() {
+            openProductDetails(getProductDetailsFromCard(card));
+        });
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                openProductDetails(getProductDetailsFromCard(card));
+            }
+        });
+    });
+
+    document.querySelectorAll('.card button').forEach(button => {
+        button.textContent = 'Add to Cart';
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    document.getElementById('productModalClose').addEventListener('click', closeProductDetails);
+    document.getElementById('productModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProductDetails();
+    });
+    document.getElementById('productModalAdd').addEventListener('click', function() {
+        if (!selectedProductForModal) return;
+        addToCart(selectedProductForModal.name, selectedProductForModal.price);
+    });
+}
+
+// -------- BUTTON CONNECT --------
+document.querySelectorAll('.card button').forEach(button => {
+    button.addEventListener('click', function () {
+        const card = button.closest('.card');
+        const name = card.querySelector('h3').textContent.trim();
+        const priceText = card.querySelector('p').textContent.trim();
+        const image = card.querySelector('img').src;
+        
+        const descriptions = {
+            'Mango': 'Fresh and tangy mango pickle with authentic spices',
+            'Lemon': 'Sour and spicy lemon pickle - perfect with rice',
+            'Garlic': 'Bold flavored garlic pickle for pickle lovers',
+            'Tomato': 'Sweet and sour tomato pickle with ginger',
+            'Chilli': 'Extra spicy green chilli pickle',
+            'Ginger': 'Warm and aromatic ginger pickle',
+            'Mixed Veg': 'Assorted vegetables in tangy pickle'
+        };
+
+        const description = descriptions[name] || 'Premium quality pickle product';
+
+        const params = new URLSearchParams({
+            name: name,
+            price: priceText,
+            image: image,
+            description: description
+        });
+
+        window.location.href = `product-detail.html?${params.toString()}`;
+    });
+});
+
+// -------- NAVIGATE TO PRODUCT --------
+
+function goToProduct(name, price, image) {
+    const descriptions = {
+        'Tomato Pickle': 'Fresh and tangy tomato pickle with authentic spices',
+        'Mango Pickle': 'Fresh and tangy mango pickle with authentic spices',
+        'Ginger Pickle': 'Warm and aromatic ginger pickle',
+        'Chilli Pickle': 'Extra spicy chilli pickle'
+    };
+    
+    const description = descriptions[name] || 'Premium quality pickle product';
+    
+    const params = new URLSearchParams({
+        name: name,
+        price: price,
+        image: image,
+        description: description
+    });
+    
+    window.location.href = `product-detail.html?${params.toString()}`;
+}
+
+// ✅ FIXED PART (THIS WAS YOUR BUG)
+document.addEventListener('DOMContentLoaded', function() {
+    initSearchFromQueryParam();
+    updateLoginDisplay();
+    updateProfileMenu();
+    initProfileMenu();
+    updateCartCount();
+    loadTestimonials();
+    initProductCards();
+    installCardPurchaseActions();
+});
+</script>
+<script src="checkout.js"></script>
+</body>
+</html>

@@ -293,6 +293,34 @@
                     const userData = await res.json();
                     this.addresses = userData.addresses || [];
 
+                    // Profile.html stores its address in addressDetails, while checkout
+                    // displays the separate addresses collection.
+                    const details = userData.addressDetails || {};
+                    const hasProfileAddress = [
+                        details.houseNo,
+                        details.area,
+                        details.city,
+                        details.state,
+                        details.pincode
+                    ].some(value => String(value || '').trim() !== '');
+
+                    if (this.addresses.length === 0 && hasProfileAddress) {
+                        this.addresses = [{
+                            _id: 'profile-address',
+                            name: userData.username || userData.firstName || 'Customer',
+                            mobile: userData.userId || '',
+                            houseNo: details.houseNo || '',
+                            street: details.street || '',
+                            area: details.area || '',
+                            city: details.city || '',
+                            state: details.state || '',
+                            pincode: details.pincode || '',
+                            landmark: details.landmark || '',
+                            isDefault: true,
+                            profileAddress: true
+                        }];
+                    }
+
                     const defaultAddr = this.addresses.find(a => a.isDefault);
                     if (defaultAddr) {
                         this.selectedAddressId = defaultAddr._id;
