@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -43,7 +44,7 @@ mongoose.connect(MONGO_URI)
 });
 
 // TEST & HEALTH CHECK ROUTES
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({
         message: 'Pickles Mart Backend Server Operating Successfully',
         database: mongoose.connection.readyState === 1 ? 'Connected to MongoDB' : 'Disconnected',
@@ -94,5 +95,14 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/admin', require('./routes/admin'));
 
+// SERVE FRONTEND STATIC FILES
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// CATCH-ALL: serve pickle.html (home page) for any non-API route
+app.get('{*path}', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'pickle.html'));
+});
+
 // START SERVER
 app.listen(PORT, () => console.log(`🚀 Pickles Mart Express server running on port ${PORT}`));
+

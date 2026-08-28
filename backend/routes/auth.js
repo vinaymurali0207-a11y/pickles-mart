@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
+const Order = require('../models/Order');
+const Review = require('../models/Review');
 const bcrypt = require('bcryptjs');
 
 function isValidUserId(userId) {
@@ -16,6 +19,50 @@ function isStrongPassword(password) {
     && /[0-9]/.test(password)
     && /[^A-Za-z0-9]/.test(password);
 }
+
+function userLookupQuery(id) {
+  return mongoose.Types.ObjectId.isValid(id)
+    ? { $or: [{ _id: id }, { userId: id }] }
+    : { userId: id };
+}
+
+// GET PROFILE DETAILS
+router.get('/user/:id', async (req, res) => {
+  try {
+    const user = await User.findOne(userLookupQuery(req.params.id))
+      .select('-password')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userStringIds = [String(user._id), user.userId].filter(Boolean);
+    const ownershipQuery = {
+      $or: [
+        { user: user._id },
+        { userId: { $in: userStringIds } }
+      ]
+    };
+
+    const [totalOrders, userReviews] = await Promise.all([
+      Order.countDocuments(ownershipQuery),
+      Review.find(ownershipQuery)
+        .select('productName rating reviewText createdAt verified')
+        .sort({ createdAt: -1, _id: -1 })
+        .lean()
+    ]);
+
+    res.json({
+      ...user,
+      loginId: user.userId || String(user._id),
+      totalOrders,
+      userReviews
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // REGISTER
 router.post('/register', async (req, res) => {
@@ -112,41 +159,59 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// UPDATE PROFILE
+function formatAddress(addressDetails) {
+  return ['houseNo', 'street', 'area', 'city', 'state', 'pincode', 'landmark']
+    .map(field => addressDetails[field])
+    .filter(value => value !== undefined && value !== null && String(value).trim() !== '')
+    .map(value => String(value).trim())
+    .join(', ');
+}
+
+// UPDATE PROFILE OR STRUCTURED ADDRESS
 router.put('/profile/:id', async (req, res) => {
-  const { username, address } = req.body;
+  const { username, firstName, lastName, profileImage, address, addressDetails } = req.body;
 
   try {
-    if (!username || !address) {
-      return res.status(400).json({
-        message: 'Username and address are required'
-      });
+    const update = {};
+
+    if (username !== undefined) update.username = String(username).trim();
+    if (firstName !== undefined) update.firstName = String(firstName).trim();
+    if (lastName !== undefined) update.lastName = String(lastName).trim();
+    if (profileImage !== undefined) update.profileImage = String(profileImage).trim();
+    if (address !== undefined) update.address = String(address).trim();
+
+    if (addressDetails && typeof addressDetails === 'object') {
+      const normalizedDetails = {
+        houseNo: String(addressDetails.houseNo || '').trim(),
+        area: String(addressDetails.area || '').trim(),
+        city: String(addressDetails.city || '').trim(),
+        state: String(addressDetails.state || '').trim(),
+        pincode: String(addressDetails.pincode || '').trim(),
+        landmark: String(addressDetails.landmark || '').trim()
+      };
+
+      update.addressDetails = normalizedDetails;
+      update.address = formatAddress(addressDetails);
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        username,
-        firstName: username,
-        address
-      },
-      {
-        new: true
-      }
-    );
+    if (!Object.keys(update).length) {
+      return res.status(400).json({ message: 'No profile details were provided' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      userLookupQuery(req.params.id),
+      { $set: update },
+      { new: true, runValidators: true }
+    ).select('-password').lean();
 
     if (!user) {
-      return res.status(404).json({
-        message: 'User not found'
-      });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     res.json({
+      ...user,
       message: 'Profile updated',
-      userId: user._id,
-      firstName: user.firstName,
-      username: user.username,
-      address: user.address
+      loginId: user.userId || String(user._id)
     });
   } catch (err) {
     res.status(500).json({
